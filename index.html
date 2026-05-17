@@ -69,7 +69,7 @@
             position: relative; padding-bottom: 120px; overflow-x: hidden;
             transition: background-color 0.4s ease;
         }
-
+        
         .folder-tab { border-bottom-right-radius: 0; margin-bottom: -1px; position: relative; z-index: 10; }
         
         /* Form Inputs */
@@ -80,12 +80,22 @@
             outline: none;
         }
         input:focus, select:focus { border-color: #8DE3FE; }
+        
+        /* Animation for optimistic UI updates */
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .card-update-anim {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
     </style>
 </head>
 <body>
 
 <!-- TOAST NOTIFICATION -->
-<div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 -translate-y-20 opacity-0 max-w-[90%] whitespace-nowrap">
+<div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 -translate-y-20 opacity-0 max-w-[90%] whitespace-nowrap pointer-events-none">
     <i id="toastIcon" class="ph-fill text-xl"></i>
     <span id="toastMsg">Notification</span>
 </div>
@@ -235,21 +245,16 @@
             </div>
             
             <form id="bookApptForm" onsubmit="submitBooking(event)" class="space-y-4">
-                
-                <!-- Search Patient -->
                 <div class="relative">
                     <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PATIENT NAME OR PHONE</label>
                     <div class="relative">
                         <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
                         <input type="text" id="baSearch" onkeyup="searchPatientDebounce()" autocomplete="off" class="w-full pl-12 pr-5 py-4 rounded-2xl" placeholder="Search...">
                     </div>
-                    <!-- Search Results Dropdown -->
                     <div id="searchResults" class="absolute w-full mt-2 bg-pillDark border border-appBorder rounded-2xl shadow-xl z-10 hidden max-h-40 overflow-y-auto">
-                        <!-- Results injected here -->
                     </div>
                 </div>
 
-                <!-- Selected Patient Hidden Field -->
                 <input type="hidden" id="baPatientId" required>
                 <div id="selectedPatientCard" class="hidden bg-cardDone/10 border border-cardDone/30 p-4 rounded-2xl flex justify-between items-center">
                     <div>
@@ -290,13 +295,15 @@
 
 <script>
     // ==========================================
-    // CONFIGURATION
+    // STATE & CONFIGURATION
     // ==========================================
-    // PASTE YOUR SCRIPT URL HERE
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1OqkYJl2CikO7y5SJRE4k9n2k3kr7wMGTa9O_eVsAPE82wVL86QJhrogcxGe1Z9LZ/exec"; 
     
     let selectedDate = new Date(); 
     document.getElementById('baDate').value = selectedDate.toISOString().split('T')[0];
+
+    // Global variable to hold queue state for optimistic updates
+    let currentQueueData = []; 
 
     // ==========================================
     // UI: SPLASH, THEME, DATE SCROLLER
@@ -372,7 +379,7 @@
         const icon = document.getElementById('toastIcon');
         
         msg.innerText = message;
-        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 max-w-[90%] whitespace-nowrap`;
+        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 max-w-[90%] whitespace-nowrap pointer-events-none`;
         
         if (type === 'success') {
             toast.classList.add('bg-cardDone', 'text-[#0B1120]');
@@ -382,13 +389,11 @@
             icon.className = 'ph-fill ph-warning-circle text-xl';
         }
 
-        // Animate in
         requestAnimationFrame(() => {
             toast.classList.remove('-translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
         });
 
-        // Auto hide
         setTimeout(() => {
             toast.classList.remove('translate-y-0', 'opacity-100');
             toast.classList.add('-translate-y-20', 'opacity-0');
@@ -435,18 +440,6 @@
             gender: document.getElementById('npGender').value,
         };
 
-        if(!GAS_WEB_APP_URL) {
-            // SIMULATE OFFLINE SUCCESS
-            setTimeout(() => {
-                showToast("Patient Added Successfully!", "success");
-                closeModal('newPatientModal');
-                document.getElementById('newPatientForm').reset();
-                btn.innerHTML = `<i class="ph-bold ph-check"></i> Save Patient Record`;
-                btn.disabled = false;
-            }, 1000);
-            return;
-        }
-
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
@@ -454,12 +447,9 @@
                 showToast("Patient Added Successfully!", "success");
                 closeModal('newPatientModal');
                 document.getElementById('newPatientForm').reset();
-            } else {
-                showToast(data.message, "error");
-            }
-        } catch(err) {
-            showToast("Connection failed.", "error");
-        } finally {
+            } else { showToast(data.message, "error"); }
+        } catch(err) { showToast("Connection failed.", "error"); } 
+        finally {
             btn.innerHTML = `<i class="ph-bold ph-check"></i> Save Patient Record`;
             btn.disabled = false;
         }
@@ -480,18 +470,6 @@
         
         if (query.length < 2) { resBox.classList.add('hidden'); return; }
 
-        if(!GAS_WEB_APP_URL) {
-            // SIMULATE SEARCH
-            resBox.innerHTML = `
-                <div onclick="selectPatient('NCC-999', 'Mock Patient Name')" class="p-4 border-b border-appBorder hover:bg-black/20 cursor-pointer">
-                    <p class="font-bold text-sm text-textMain">Mock Patient Name</p>
-                    <p class="text-xs text-textMuted">NCC-999 • ${query}</p>
-                </div>
-            `;
-            resBox.classList.remove('hidden');
-            return;
-        }
-
         try {
             resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted"><i class="ph ph-spinner-gap animate-spin"></i> Searching...</div>`;
             resBox.classList.remove('hidden');
@@ -506,19 +484,14 @@
                         <p class="text-xs text-textMuted">${p.patientId} • ${p.phone}</p>
                     </div>
                 `).join('');
-            } else {
-                resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted">No patients found.</div>`;
-            }
-        } catch(e) {
-            resBox.innerHTML = `<div class="p-4 text-center text-xs text-red-400">Search failed.</div>`;
-        }
+            } else { resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted">No patients found.</div>`; }
+        } catch(e) { resBox.innerHTML = `<div class="p-4 text-center text-xs text-red-400">Search failed.</div>`; }
     }
 
     function selectPatient(id, name) {
         document.getElementById('baPatientId').value = id;
         document.getElementById('selPatName').innerText = name;
         document.getElementById('selPatId').innerText = id;
-        
         document.getElementById('baSearch').parentElement.classList.add('hidden');
         document.getElementById('searchResults').classList.add('hidden');
         document.getElementById('selectedPatientCard').classList.remove('hidden');
@@ -547,17 +520,6 @@
             timeSlot: document.getElementById('baTime').value
         };
 
-        if(!GAS_WEB_APP_URL) {
-            setTimeout(() => {
-                showToast("Appointment Booked!", "success");
-                closeModal('bookApptModal');
-                clearSelectedPatient();
-                btn.innerHTML = `<i class="ph-bold ph-calendar-plus"></i> Confirm Booking`;
-                btn.disabled = false;
-            }, 1000);
-            return;
-        }
-
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
@@ -565,77 +527,92 @@
                 showToast(`Token #${data.data.tokenNo} Generated!`, "success");
                 closeModal('bookApptModal');
                 clearSelectedPatient();
-                fetchQueueData(); // Refresh list
-            } else {
-                showToast(data.message, "error");
-            }
-        } catch(err) {
-            showToast("Connection failed.", "error");
-        } finally {
+                
+                // Show loading state and fetch new data
+                document.getElementById('queueContainer').innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Refreshing queue...</p></div>`;
+                fetchQueueData(); 
+            } else { showToast(data.message, "error"); }
+        } catch(err) { showToast("Connection failed.", "error"); } 
+        finally {
             btn.innerHTML = `<i class="ph-bold ph-calendar-plus"></i> Confirm Booking`;
             btn.disabled = false;
         }
     }
 
     // ==========================================
-    // API: GET QUEUE
+    // API: GET QUEUE & OPTIMISTIC UI UPDATES
     // ==========================================
     async function fetchQueueData() {
         const container = document.getElementById('queueContainer');
         
-        if (!GAS_WEB_APP_URL) {
-            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium px-6 border-2 border-dashed border-appBorder mx-4 rounded-3xl mt-4">
-                <i class="ph-bold ph-link text-3xl mb-2 text-textMuted/50"></i><br>
-                Please paste your Google Apps Script Web App URL in the code to connect the database.</div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading queue...</p></div>`;
-
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] })
             });
             const result = await response.json();
-            if(result.success) renderQueue(result.data);
-            else showToast(result.message, "error");
+            if(result.success) {
+                currentQueueData = result.data; // Store in local state
+                renderQueue(); // Draw UI
+            } else showToast(result.message, "error");
         } catch (e) {
             showToast("Failed to fetch queue.", "error");
             container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`;
         }
     }
 
+    // 🔥 OPTIMISTIC UI UPDATE FUNCTION
     async function advanceStatus(tokenNo, currentStatus) {
-        if (!GAS_WEB_APP_URL) return;
         const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
         let currentIndex = statusFlow.indexOf(currentStatus);
         if (currentIndex === -1 || currentIndex === 3) return;
+        
         let newStatus = statusFlow[currentIndex + 1];
 
+        // 1. Instantly update Local State
+        const itemIndex = currentQueueData.findIndex(q => q.tokenNo === tokenNo);
+        if (itemIndex > -1) {
+            currentQueueData[itemIndex].status = newStatus;
+        }
+
+        // 2. Instantly re-render UI (feels lightning fast, no glitchy loading spinners!)
+        renderQueue(tokenNo); 
+
+        // 3. Send silent background request to Google Sheets
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
             });
             const result = await response.json();
-            if(result.success) {
-                showToast("Status Updated!", "success");
-                fetchQueueData();
+            
+            if(!result.success) {
+                // If API fails, revert the UI and show error
+                if (itemIndex > -1) currentQueueData[itemIndex].status = currentStatus;
+                renderQueue();
+                showToast("Failed to sync with server. Reverted.", "error");
             }
-        } catch(e) { showToast("Failed to update status.", "error"); }
+        } catch(e) { 
+            // Network failure handling
+            if (itemIndex > -1) currentQueueData[itemIndex].status = currentStatus;
+            renderQueue();
+            showToast("Network error. Could not update.", "error"); 
+        }
     }
 
-    function renderQueue(queueData) {
+    // ==========================================
+    // RENDER LOGIC (Folder Style with Serial Numbers)
+    // ==========================================
+    function renderQueue(animatedTokenNo = null) {
         const container = document.getElementById('queueContainer');
         container.innerHTML = "";
 
-        if(queueData.length === 0) {
+        if(currentQueueData.length === 0) {
             container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`;
             return;
         }
 
-        queueData.forEach((appt, index) => {
+        currentQueueData.forEach((appt, index) => {
             let bgColor, iconClass, nextAction;
             switch(appt.status) {
                 case 'Done': bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
@@ -644,27 +621,34 @@
                 case 'Booked': default: bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
             }
 
-            const timeParts = appt.timeSlot.split(' '); 
-            const isLast = index === queueData.length - 1;
+            const isLast = index === currentQueueData.length - 1;
+            const animClass = animatedTokenNo === appt.tokenNo ? 'card-update-anim' : '';
 
             container.innerHTML += `
-                <div class="flex h-full">
+                <div class="flex h-full group ${animClass}">
+                    
+                    <!-- Left Column: Token Number (Serial Number) -->
                     <div class="w-16 flex flex-col items-center shrink-0 pt-1">
-                        <span class="text-[13px] font-bold text-textMain block">${timeParts[0]}</span>
-                        <span class="text-[10px] font-semibold text-textMuted mb-2">${timeParts[1] ? timeParts[1].toLowerCase() : ''}</span>
+                        <span class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1 mt-2">Token</span>
+                        <span class="text-[22px] font-black text-textMain leading-none mb-2">#${appt.tokenNo}</span>
                         ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}
                     </div>
+                    
+                    <!-- Right Column: The File Folder Card -->
                     <div class="flex-1 pl-3 pb-8">
                         <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
                             <i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}
                         </div>
+                        
                         <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
-                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId}</p>
+                                    <!-- Time has been cleanly moved to the card details -->
+                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${appt.timeSlot}</p>
                                 </div>
                             </div>
+                            
                             <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
                                 <div class="flex -space-x-2">
                                     <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
