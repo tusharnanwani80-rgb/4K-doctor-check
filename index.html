@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Pise - Naturopathy Dashboard</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -24,7 +21,7 @@
                         textMuted: 'var(--text-muted)',
                         navBg: 'var(--nav-bg)',
                         appBorder: 'var(--border-color)',
-                        // Cards stay pastel in both themes for contrast
+                        inputBg: 'var(--input-bg)',
                         cardDone: '#D9F4A7',   
                         cardConsult: '#E5D4FF',
                         cardWaiting: '#8DE3FE',
@@ -35,7 +32,6 @@
         }
     </script>
     <style>
-        /* Theme Variables */
         :root {
             --bg-main: #0B1120;
             --bg-header: #141E33;
@@ -44,6 +40,7 @@
             --text-muted: #94A3B8;
             --nav-bg: rgba(20, 30, 51, 0.9);
             --border-color: #1E293B;
+            --input-bg: #0F172A;
         }
 
         [data-theme="light"] {
@@ -54,42 +51,44 @@
             --text-muted: #64748B;
             --nav-bg: rgba(255, 255, 255, 0.9);
             --border-color: #E2E8F0;
+            --input-bg: #F1F5F9;
         }
 
         body { 
-            background-color: var(--bg-main); 
-            color: var(--text-main); 
+            background-color: var(--bg-main); color: var(--text-main); 
             -webkit-tap-highlight-color: transparent; 
             transition: background-color 0.4s ease, color 0.4s ease;
         }
         
-        /* Hide scrollbar for horizontal scroll */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Mobile First Container */
         .app-container { 
-            width: 100%; 
-            max-width: 480px; 
-            margin: 0 auto; 
-            background-color: var(--bg-main); 
-            min-height: 100vh; 
-            position: relative; 
-            padding-bottom: 120px; /* Space for nav and footer */
-            overflow-x: hidden;
+            width: 100%; max-width: 480px; margin: 0 auto; 
+            background-color: var(--bg-main); min-height: 100vh; 
+            position: relative; padding-bottom: 120px; overflow-x: hidden;
             transition: background-color 0.4s ease;
         }
 
-        /* Seamless Folder Tab CSS Hack */
-        .folder-tab {
-            border-bottom-right-radius: 0;
-            margin-bottom: -1px; 
-            position: relative;
-            z-index: 10;
+        .folder-tab { border-bottom-right-radius: 0; margin-bottom: -1px; position: relative; z-index: 10; }
+        
+        /* Form Inputs */
+        input, select {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            outline: none;
         }
+        input:focus, select:focus { border-color: #8DE3FE; }
     </style>
 </head>
 <body>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 -translate-y-20 opacity-0 max-w-[90%] whitespace-nowrap">
+    <i id="toastIcon" class="ph-fill text-xl"></i>
+    <span id="toastMsg">Notification</span>
+</div>
 
 <!-- SPLASH SCREEN -->
 <div id="splashScreen" class="fixed inset-0 bg-appBg z-[100] flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
@@ -114,17 +113,13 @@
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
         </div>
         <div class="relative self-start mt-4 flex gap-2">
-            <!-- Theme Toggle Button -->
             <button onclick="toggleTheme()" class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
                 <i id="themeIcon" class="ph-bold ph-sun text-xl"></i>
-            </button>
-            <button class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
-                <i class="ph-bold ph-dots-three-vertical text-xl"></i>
             </button>
         </div>
     </div>
 
-    <!-- DATE SELECTOR (Premium Oval UI) -->
+    <!-- DATE SELECTOR -->
     <div class="pt-8 pb-6 bg-appBg sticky top-0 z-10 transition-colors duration-400">
         <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer">
             <h2 class="text-xl font-medium text-textMain" id="currentMonthYear">May 2026</h2>
@@ -138,7 +133,6 @@
     <!-- MAIN QUEUE TIMELINE -->
     <div class="px-4 mt-2 relative z-0">
         <div id="queueContainer" class="space-y-0">
-            <!-- Queue items injected via JS -->
             <div class="text-center text-textMuted py-20" id="loadingState">
                 <i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i>
                 <p class="font-medium">Loading queue...</p>
@@ -147,7 +141,7 @@
         
         <!-- AGENCY FOOTER -->
         <div class="text-center pt-10 pb-20">
-            <p class="text-[10px] font-bold tracking-[0.15em] text-textMuted/50 uppercase uppercase">
+            <p class="text-[10px] font-bold tracking-[0.15em] text-textMuted/50 uppercase">
                 This app was made by Seen and Sold Agency.
             </p>
         </div>
@@ -159,7 +153,7 @@
         <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-users text-[26px]"></i></button>
         
         <!-- FAB button -->
-        <button onclick="openActionModal()" class="w-16 h-16 bg-cardDone rounded-full flex items-center justify-center text-[#0B1120] shadow-lg shadow-cardDone/30 transform -translate-y-8 hover:scale-105 transition-transform border-4 border-appBg">
+        <button onclick="openModal('actionModal')" class="w-16 h-16 bg-cardDone rounded-full flex items-center justify-center text-[#0B1120] shadow-lg shadow-cardDone/30 transform -translate-y-8 hover:scale-105 transition-transform border-4 border-appBg">
             <i class="ph-bold ph-plus text-2xl"></i>
         </button>
         
@@ -167,26 +161,128 @@
         <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-gear text-[26px]"></i></button>
     </div>
 
-    <!-- ACTION MODAL (Hidden by default) -->
-    <div id="actionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <!-- 1. QUICK ACTIONS MODAL -->
+    <div id="actionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden flex flex-col justify-end max-w-[480px] mx-auto">
         <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="actionModalContent">
             <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-8"></div>
             <h3 class="text-xl font-bold mb-6 px-2 text-textMain">Quick Actions</h3>
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <button class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                <button onclick="switchModal('actionModal', 'newPatientModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
                     <div class="w-14 h-14 bg-cardWaiting/20 rounded-full flex items-center justify-center text-cardWaiting">
                         <i class="ph-fill ph-user-plus text-3xl"></i>
                     </div>
                     <span class="font-medium text-sm text-textMain">New Patient</span>
                 </button>
-                <button class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                <button onclick="switchModal('actionModal', 'bookApptModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
                     <div class="w-14 h-14 bg-cardDone/20 rounded-full flex items-center justify-center text-cardDone">
                         <i class="ph-fill ph-calendar-plus text-3xl"></i>
                     </div>
                     <span class="font-medium text-sm text-textMain">Book Appt</span>
                 </button>
             </div>
-            <button onclick="closeActionModal()" class="w-full py-4 bg-transparent border border-appBorder rounded-full font-semibold text-textMuted hover:bg-textMuted/10 transition">Close Menu</button>
+            <button onclick="closeModal('actionModal')" class="w-full py-4 bg-transparent border border-appBorder rounded-full font-semibold text-textMuted hover:bg-textMuted/10 transition">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 2. NEW PATIENT MODAL -->
+    <div id="newPatientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="newPatientModalContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-textMain">Register Patient</h3>
+                <button onclick="closeModal('newPatientModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <form id="newPatientForm" onsubmit="submitNewPatient(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">FULL NAME</label>
+                    <input type="text" id="npName" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. Ramesh Kumar">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PHONE NUMBER</label>
+                    <input type="tel" id="npPhone" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. 9876543210">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">EMAIL (Optional)</label>
+                    <input type="email" id="npEmail" class="w-full px-5 py-4 rounded-2xl" placeholder="For calendar invites">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">AGE</label>
+                        <input type="number" id="npAge" required class="w-full px-5 py-4 rounded-2xl" placeholder="Age">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">GENDER</label>
+                        <select id="npGender" required class="w-full px-5 py-4 rounded-2xl appearance-none">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" id="btnSubmitPatient" class="w-full mt-4 py-4 bg-cardWaiting text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90">
+                    <i class="ph-bold ph-check"></i> Save Patient Record
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. BOOK APPOINTMENT MODAL -->
+    <div id="bookApptModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="bookApptModalContent">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-textMain">Book Appointment</h3>
+                <button onclick="closeModal('bookApptModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <form id="bookApptForm" onsubmit="submitBooking(event)" class="space-y-4">
+                
+                <!-- Search Patient -->
+                <div class="relative">
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PATIENT NAME OR PHONE</label>
+                    <div class="relative">
+                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
+                        <input type="text" id="baSearch" onkeyup="searchPatientDebounce()" autocomplete="off" class="w-full pl-12 pr-5 py-4 rounded-2xl" placeholder="Search...">
+                    </div>
+                    <!-- Search Results Dropdown -->
+                    <div id="searchResults" class="absolute w-full mt-2 bg-pillDark border border-appBorder rounded-2xl shadow-xl z-10 hidden max-h-40 overflow-y-auto">
+                        <!-- Results injected here -->
+                    </div>
+                </div>
+
+                <!-- Selected Patient Hidden Field -->
+                <input type="hidden" id="baPatientId" required>
+                <div id="selectedPatientCard" class="hidden bg-cardDone/10 border border-cardDone/30 p-4 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-cardDone text-sm" id="selPatName">Name</p>
+                        <p class="text-xs text-textMuted" id="selPatId">ID</p>
+                    </div>
+                    <button type="button" onclick="clearSelectedPatient()" class="text-textMuted hover:text-white"><i class="ph-bold ph-x-circle text-lg"></i></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">DATE</label>
+                        <input type="date" id="baDate" required class="w-full px-5 py-4 rounded-2xl" style="color-scheme: dark;">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">TIME</label>
+                        <select id="baTime" required class="w-full px-5 py-4 rounded-2xl appearance-none">
+                            <option value="09:00 AM">09:00 AM</option>
+                            <option value="09:30 AM">09:30 AM</option>
+                            <option value="10:00 AM">10:00 AM</option>
+                            <option value="10:30 AM">10:30 AM</option>
+                            <option value="11:00 AM">11:00 AM</option>
+                            <option value="04:00 PM">04:00 PM</option>
+                            <option value="04:30 PM">04:30 PM</option>
+                            <option value="05:00 PM">05:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmitBooking" class="w-full mt-6 py-4 bg-cardDone text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90">
+                    <i class="ph-bold ph-calendar-plus"></i> Confirm Booking
+                </button>
+            </form>
         </div>
     </div>
 
@@ -196,15 +292,16 @@
     // ==========================================
     // CONFIGURATION
     // ==========================================
+    // PASTE YOUR SCRIPT URL HERE
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1OqkYJl2CikO7y5SJRE4k9n2k3kr7wMGTa9O_eVsAPE82wVL86QJhrogcxGe1Z9LZ/exec"; 
     
     let selectedDate = new Date(); 
+    document.getElementById('baDate').value = selectedDate.toISOString().split('T')[0];
 
     // ==========================================
-    // SPLASH SCREEN & AUDIO LOGIC
+    // UI: SPLASH, THEME, DATE SCROLLER
     // ==========================================
     window.onload = () => {
-        // Trigger fade in animations on load
         setTimeout(() => {
             document.getElementById('splashLogo').classList.remove('opacity-0', 'scale-50');
             document.getElementById('splashText').classList.remove('opacity-0', 'translate-y-4');
@@ -213,42 +310,29 @@
     };
 
     function startApp() {
-        // Play soft premium notification chime
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audio.volume = 0.5; // Soft volume
-        audio.play().catch(e => console.log("Audio play blocked by browser", e));
-        
-        // Fade out splash screen
+        audio.volume = 0.5; audio.play().catch(e => {});
         const splash = document.getElementById('splashScreen');
         splash.style.opacity = '0';
-        
-        // Remove from DOM after transition
-        setTimeout(() => {
-            splash.style.display = 'none';
-        }, 700);
+        setTimeout(() => { splash.style.display = 'none'; }, 700);
     }
 
-    // ==========================================
-    // THEME TOGGLE LOGIC
-    // ==========================================
     function toggleTheme() {
         const body = document.body;
         const themeIcon = document.getElementById('themeIcon');
+        const dateInput = document.getElementById('baDate');
         
         if (body.getAttribute('data-theme') === 'light') {
             body.removeAttribute('data-theme');
-            themeIcon.classList.remove('ph-moon');
-            themeIcon.classList.add('ph-sun');
+            themeIcon.classList.replace('ph-moon', 'ph-sun');
+            dateInput.style.colorScheme = 'dark';
         } else {
             body.setAttribute('data-theme', 'light');
-            themeIcon.classList.remove('ph-sun');
-            themeIcon.classList.add('ph-moon');
+            themeIcon.classList.replace('ph-sun', 'ph-moon');
+            dateInput.style.colorScheme = 'light';
         }
     }
 
-    // ==========================================
-    // UI INITIALIZATION
-    // ==========================================
     document.addEventListener("DOMContentLoaded", () => {
         renderDateSelector();
         fetchQueueData();
@@ -257,57 +341,256 @@
     function renderDateSelector() {
         const scroller = document.getElementById('dateScroller');
         const monthYear = document.getElementById('currentMonthYear');
-        
-        const options = { month: 'long', year: 'numeric' };
-        monthYear.innerText = selectedDate.toLocaleDateString('en-US', options);
-
+        monthYear.innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         scroller.innerHTML = "";
         
         for(let i = -2; i <= 4; i++) {
             let d = new Date(selectedDate);
             d.setDate(d.getDate() + i);
-            
             const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
             const dateNum = d.getDate();
             const isToday = i === 0;
-
             const dateBtn = document.createElement('div');
             
             if (isToday) {
-                // Active Day
                 dateBtn.className = `flex flex-col items-center justify-center w-[64px] h-[100px] rounded-full bg-cardDone text-[#0B1120] shadow-[0_10px_20px_rgba(217,244,167,0.15)] transform -translate-y-2 shrink-0 cursor-pointer transition-colors duration-400`;
-                dateBtn.innerHTML = `
-                    <span class="text-[26px] font-extrabold leading-none tracking-tight">${dateNum}</span>
-                    <span class="text-xs font-bold mt-1.5 opacity-80">${dayName}</span>
-                `;
+                dateBtn.innerHTML = `<span class="text-[26px] font-extrabold leading-none tracking-tight">${dateNum}</span><span class="text-xs font-bold mt-1.5 opacity-80">${dayName}</span>`;
             } else {
-                // Inactive Day uses semantic theme classes
                 dateBtn.className = `flex flex-col items-center justify-center w-[54px] h-[84px] rounded-full bg-pillDark text-textMuted shrink-0 cursor-pointer border border-appBorder hover:opacity-80 transition-all duration-400`;
-                dateBtn.innerHTML = `
-                    <span class="text-xl font-bold text-textMain">${dateNum}</span>
-                    <span class="text-[10px] font-semibold mt-1">${dayName}</span>
-                `;
+                dateBtn.innerHTML = `<span class="text-xl font-bold text-textMain">${dateNum}</span><span class="text-[10px] font-semibold mt-1">${dayName}</span>`;
             }
             scroller.appendChild(dateBtn);
         }
     }
 
     // ==========================================
-    // API CALLS & DATA HANDLING
+    // UI: TOAST NOTIFICATIONS
+    // ==========================================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toastMsg');
+        const icon = document.getElementById('toastIcon');
+        
+        msg.innerText = message;
+        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 max-w-[90%] whitespace-nowrap`;
+        
+        if (type === 'success') {
+            toast.classList.add('bg-cardDone', 'text-[#0B1120]');
+            icon.className = 'ph-fill ph-check-circle text-xl';
+        } else {
+            toast.classList.add('bg-red-500', 'text-white');
+            icon.className = 'ph-fill ph-warning-circle text-xl';
+        }
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+        });
+
+        // Auto hide
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('-translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+
+    // ==========================================
+    // UI: MODAL CONTROLS
+    // ==========================================
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        const content = document.getElementById(id + 'Content');
+        modal.classList.remove('hidden');
+        setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
+    }
+    
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        const content = document.getElementById(id + 'Content');
+        content.classList.add('translate-y-full');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+
+    function switchModal(closeId, openId) {
+        closeModal(closeId);
+        setTimeout(() => { openModal(openId); }, 300);
+    }
+
+    // ==========================================
+    // API: ADD PATIENT
+    // ==========================================
+    async function submitNewPatient(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitPatient');
+        btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'addPatient',
+            name: document.getElementById('npName').value,
+            phone: document.getElementById('npPhone').value,
+            email: document.getElementById('npEmail').value,
+            age: document.getElementById('npAge').value,
+            gender: document.getElementById('npGender').value,
+        };
+
+        if(!GAS_WEB_APP_URL) {
+            // SIMULATE OFFLINE SUCCESS
+            setTimeout(() => {
+                showToast("Patient Added Successfully!", "success");
+                closeModal('newPatientModal');
+                document.getElementById('newPatientForm').reset();
+                btn.innerHTML = `<i class="ph-bold ph-check"></i> Save Patient Record`;
+                btn.disabled = false;
+            }, 1000);
+            return;
+        }
+
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) {
+                showToast("Patient Added Successfully!", "success");
+                closeModal('newPatientModal');
+                document.getElementById('newPatientForm').reset();
+            } else {
+                showToast(data.message, "error");
+            }
+        } catch(err) {
+            showToast("Connection failed.", "error");
+        } finally {
+            btn.innerHTML = `<i class="ph-bold ph-check"></i> Save Patient Record`;
+            btn.disabled = false;
+        }
+    }
+
+    // ==========================================
+    // API: SEARCH & BOOK APPOINTMENT
+    // ==========================================
+    let searchTimeout;
+    function searchPatientDebounce() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(searchPatient, 500);
+    }
+
+    async function searchPatient() {
+        const query = document.getElementById('baSearch').value;
+        const resBox = document.getElementById('searchResults');
+        
+        if (query.length < 2) { resBox.classList.add('hidden'); return; }
+
+        if(!GAS_WEB_APP_URL) {
+            // SIMULATE SEARCH
+            resBox.innerHTML = `
+                <div onclick="selectPatient('NCC-999', 'Mock Patient Name')" class="p-4 border-b border-appBorder hover:bg-black/20 cursor-pointer">
+                    <p class="font-bold text-sm text-textMain">Mock Patient Name</p>
+                    <p class="text-xs text-textMuted">NCC-999 • ${query}</p>
+                </div>
+            `;
+            resBox.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted"><i class="ph ph-spinner-gap animate-spin"></i> Searching...</div>`;
+            resBox.classList.remove('hidden');
+
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'searchPatient', query: query }) });
+            const data = await res.json();
+            
+            if (data.success && data.data.length > 0) {
+                resBox.innerHTML = data.data.map(p => `
+                    <div onclick="selectPatient('${p.patientId}', '${p.name}')" class="p-4 border-b border-appBorder hover:bg-black/20 cursor-pointer transition">
+                        <p class="font-bold text-sm text-textMain">${p.name}</p>
+                        <p class="text-xs text-textMuted">${p.patientId} • ${p.phone}</p>
+                    </div>
+                `).join('');
+            } else {
+                resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted">No patients found.</div>`;
+            }
+        } catch(e) {
+            resBox.innerHTML = `<div class="p-4 text-center text-xs text-red-400">Search failed.</div>`;
+        }
+    }
+
+    function selectPatient(id, name) {
+        document.getElementById('baPatientId').value = id;
+        document.getElementById('selPatName').innerText = name;
+        document.getElementById('selPatId').innerText = id;
+        
+        document.getElementById('baSearch').parentElement.classList.add('hidden');
+        document.getElementById('searchResults').classList.add('hidden');
+        document.getElementById('selectedPatientCard').classList.remove('hidden');
+    }
+
+    function clearSelectedPatient() {
+        document.getElementById('baPatientId').value = '';
+        document.getElementById('selectedPatientCard').classList.add('hidden');
+        document.getElementById('baSearch').parentElement.classList.remove('hidden');
+        document.getElementById('baSearch').value = '';
+    }
+
+    async function submitBooking(e) {
+        e.preventDefault();
+        const pId = document.getElementById('baPatientId').value;
+        if(!pId) { showToast("Please search and select a patient first.", "error"); return; }
+
+        const btn = document.getElementById('btnSubmitBooking');
+        btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Booking...`;
+        btn.disabled = true;
+
+        const payload = {
+            action: 'bookAppointment',
+            patientId: pId,
+            date: document.getElementById('baDate').value,
+            timeSlot: document.getElementById('baTime').value
+        };
+
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => {
+                showToast("Appointment Booked!", "success");
+                closeModal('bookApptModal');
+                clearSelectedPatient();
+                btn.innerHTML = `<i class="ph-bold ph-calendar-plus"></i> Confirm Booking`;
+                btn.disabled = false;
+            }, 1000);
+            return;
+        }
+
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            if(data.success) {
+                showToast(`Token #${data.data.tokenNo} Generated!`, "success");
+                closeModal('bookApptModal');
+                clearSelectedPatient();
+                fetchQueueData(); // Refresh list
+            } else {
+                showToast(data.message, "error");
+            }
+        } catch(err) {
+            showToast("Connection failed.", "error");
+        } finally {
+            btn.innerHTML = `<i class="ph-bold ph-calendar-plus"></i> Confirm Booking`;
+            btn.disabled = false;
+        }
+    }
+
+    // ==========================================
+    // API: GET QUEUE
     // ==========================================
     async function fetchQueueData() {
         const container = document.getElementById('queueContainer');
-        container.innerHTML = `
-            <div class="text-center text-textMuted py-20">
-                <i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i>
-                <p class="font-medium">Loading queue...</p>
-            </div>
-        `;
-
+        
         if (!GAS_WEB_APP_URL) {
-            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium px-6">Please connect the GAS_WEB_APP_URL to load data.</div>`;
+            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium px-6 border-2 border-dashed border-appBorder mx-4 rounded-3xl mt-4">
+                <i class="ph-bold ph-link text-3xl mb-2 text-textMuted/50"></i><br>
+                Please paste your Google Apps Script Web App URL in the code to connect the database.</div>`;
             return;
         }
+
+        container.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading queue...</p></div>`;
 
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
@@ -316,23 +599,19 @@
             });
             const result = await response.json();
             if(result.success) renderQueue(result.data);
-            else alert("Error loading queue: " + result.message);
+            else showToast(result.message, "error");
         } catch (e) {
-            console.error(e);
-            alert("Failed to connect to backend.");
+            showToast("Failed to fetch queue.", "error");
+            container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`;
         }
     }
 
     async function advanceStatus(tokenNo, currentStatus) {
+        if (!GAS_WEB_APP_URL) return;
         const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
         let currentIndex = statusFlow.indexOf(currentStatus);
         if (currentIndex === -1 || currentIndex === 3) return;
         let newStatus = statusFlow[currentIndex + 1];
-
-        if (!GAS_WEB_APP_URL) {
-            alert("Please connect the GAS_WEB_APP_URL to perform actions.");
-            return;
-        }
 
         try {
             const response = await fetch(GAS_WEB_APP_URL, {
@@ -340,107 +619,67 @@
                 body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
             });
             const result = await response.json();
-            if(result.success) fetchQueueData();
-        } catch(e) { alert("Failed to update status."); }
+            if(result.success) {
+                showToast("Status Updated!", "success");
+                fetchQueueData();
+            }
+        } catch(e) { showToast("Failed to update status.", "error"); }
     }
 
-    // ==========================================
-    // RENDER LOGIC
-    // ==========================================
     function renderQueue(queueData) {
         const container = document.getElementById('queueContainer');
         container.innerHTML = "";
 
         if(queueData.length === 0) {
-            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium">No appointments today.</div>`;
+            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`;
             return;
         }
 
         queueData.forEach((appt, index) => {
             let bgColor, iconClass, nextAction;
-            
             switch(appt.status) {
-                case 'Done':
-                    bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
-                case 'In Consultation':
-                    bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Mark Done"; break;
-                case 'Waiting':
-                    bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
-                case 'Booked':
-                default:
-                    bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
+                case 'Done': bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
+                case 'In Consultation': bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Mark Done"; break;
+                case 'Waiting': bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
+                case 'Booked': default: bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
             }
 
             const timeParts = appt.timeSlot.split(' '); 
             const isLast = index === queueData.length - 1;
 
-            const cardHtml = `
+            container.innerHTML += `
                 <div class="flex h-full">
-                    <!-- Left Column: Time & Dashed Line -->
                     <div class="w-16 flex flex-col items-center shrink-0 pt-1">
                         <span class="text-[13px] font-bold text-textMain block">${timeParts[0]}</span>
                         <span class="text-[10px] font-semibold text-textMuted mb-2">${timeParts[1] ? timeParts[1].toLowerCase() : ''}</span>
-                        ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/40 mb-2"></div>` : `<div class="flex-1"></div>`}
+                        ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}
                     </div>
-
-                    <!-- Right Column: The File Folder Card -->
                     <div class="flex-1 pl-3 pb-8">
                         <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
-                            <i class="ph-fill ${iconClass} text-lg"></i>
-                            ${appt.status}
+                            <i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}
                         </div>
-                        
-                        <!-- Main Card Body - Text inside remains Dark for contrast against pastel -->
                         <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
                                     <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId}</p>
                                 </div>
-                                <button class="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition">
-                                    <i class="ph-bold ph-dots-three-vertical text-xl"></i>
-                                </button>
                             </div>
-                            
                             <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
                                 <div class="flex -space-x-2">
                                     <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
-                                    <div class="w-7 h-7 rounded-full bg-[#141E33] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-pill text-[10px] text-white"></i></div>
-                                    <div class="w-7 h-7 rounded-full bg-white/40 border-2 border-${bgColor} flex items-center justify-center text-[10px] font-bold">+</div>
                                 </div>
-                                
                                 ${nextAction ? `
-                                <button onclick="advanceStatus(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition-all flex items-center gap-2 shadow-lg">
+                                <button onclick="advanceStatus(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">
                                     ${nextAction} <i class="ph-bold ph-arrow-right"></i>
                                 </button>
-                                ` : `
-                                <div class="flex items-center gap-2 text-sm font-bold opacity-70">
-                                    <div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%
-                                </div>
-                                `}
+                                ` : `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`}
                             </div>
                         </div>
                     </div>
                 </div>
             `;
-            container.innerHTML += cardHtml;
         });
-    }
-
-    // ==========================================
-    // MODAL LOGIC
-    // ==========================================
-    function openActionModal() {
-        const modal = document.getElementById('actionModal');
-        const content = document.getElementById('actionModalContent');
-        modal.classList.remove('hidden');
-        setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
-    }
-    function closeActionModal() {
-        const modal = document.getElementById('actionModal');
-        const content = document.getElementById('actionModalContent');
-        content.classList.add('translate-y-full');
-        setTimeout(() => { modal.classList.add('hidden'); }, 300);
     }
 </script>
 </body>
