@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Pise - Naturopathy Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        appBg: 'var(--bg-main)',      
+                        appHeader: 'var(--bg-header)',  
+                        pillDark: 'var(--bg-pill)',   
+                        textMain: 'var(--text-main)',
+                        textMuted: 'var(--text-muted)',
+                        navBg: 'var(--nav-bg)',
+                        appBorder: 'var(--border-color)',
+                        // Cards stay pastel in both themes for contrast
+                        cardDone: '#D9F4A7',   
+                        cardConsult: '#E5D4FF',
+                        cardWaiting: '#8DE3FE',
+                        cardBooked: '#FFE4C4', 
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-main: #0B1120;
+            --bg-header: #141E33;
+            --bg-pill: #202E47;
+            --text-main: #FFFFFF;
+            --text-muted: #94A3B8;
+            --nav-bg: rgba(20, 30, 51, 0.9);
+            --border-color: #1E293B;
+        }
+
+        [data-theme="light"] {
+            --bg-main: #F8FAFC;
+            --bg-header: #FFFFFF;
+            --bg-pill: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --border-color: #E2E8F0;
+        }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            -webkit-tap-highlight-color: transparent; 
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        
+        /* Hide scrollbar for horizontal scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Mobile First Container */
+        .app-container { 
+            width: 100%; 
+            max-width: 480px; 
+            margin: 0 auto; 
+            background-color: var(--bg-main); 
+            min-height: 100vh; 
+            position: relative; 
+            padding-bottom: 120px; /* Space for nav and footer */
+            overflow-x: hidden;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Seamless Folder Tab CSS Hack */
+        .folder-tab {
+            border-bottom-right-radius: 0;
+            margin-bottom: -1px; 
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splashScreen" class="fixed inset-0 bg-appBg z-[100] flex flex-col items-center justify-center transition-all duration-700 ease-in-out">
+    <div class="w-20 h-20 bg-cardDone rounded-full flex items-center justify-center mb-6 shadow-lg shadow-cardDone/20 opacity-0 transform scale-50 transition-all duration-700 delay-100" id="splashLogo">
+        <i class="ph-fill ph-leaf text-4xl text-[#0B1120]"></i>
+    </div>
+    <h1 id="splashText" class="text-3xl font-bold text-textMain text-center mb-10 opacity-0 transform translate-y-4 transition-all duration-700 delay-300">
+        Hello<br>Dr. Rajubhau Pise
+    </h1>
+    <button id="startBtn" onclick="startApp()" class="px-10 py-4 bg-textMain text-appBg font-bold rounded-full shadow-xl opacity-0 transform translate-y-4 transition-all duration-700 delay-500 hover:scale-105 active:scale-95">
+        Tap to Open Dashboard
+    </button>
+</div>
+
+<div class="app-container md:border-x md:border-appBorder md:shadow-2xl">
+    
+    <!-- HEADER -->
+    <div class="px-6 pt-10 pb-4 flex justify-between items-center bg-appHeader rounded-b-[40px] z-20 relative shadow-lg transition-colors duration-400">
+        <div>
+            <i class="ph-bold ph-arrow-left text-xl mb-4 block text-textMain"></i>
+            <h1 class="text-2xl font-bold text-textMain tracking-tight">Today's Queue</h1>
+            <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
+        </div>
+        <div class="relative self-start mt-4 flex gap-2">
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
+                <i id="themeIcon" class="ph-bold ph-sun text-xl"></i>
+            </button>
+            <button class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
+                <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- DATE SELECTOR (Premium Oval UI) -->
+    <div class="pt-8 pb-6 bg-appBg sticky top-0 z-10 transition-colors duration-400">
+        <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer">
+            <h2 class="text-xl font-medium text-textMain" id="currentMonthYear">May 2026</h2>
+            <i class="ph-bold ph-caret-down text-textMuted"></i>
+        </div>
+        <div class="flex space-x-3 overflow-x-auto no-scrollbar px-6 items-end h-[110px]" id="dateScroller">
+            <!-- Dates injected via JS -->
+        </div>
+    </div>
+
+    <!-- MAIN QUEUE TIMELINE -->
+    <div class="px-4 mt-2 relative z-0">
+        <div id="queueContainer" class="space-y-0">
+            <!-- Queue items injected via JS -->
+            <div class="text-center text-textMuted py-20" id="loadingState">
+                <i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i>
+                <p class="font-medium">Loading queue...</p>
+            </div>
+        </div>
+        
+        <!-- AGENCY FOOTER -->
+        <div class="text-center pt-10 pb-20">
+            <p class="text-[10px] font-bold tracking-[0.15em] text-textMuted/50 uppercase uppercase">
+                This app was made by Seen and Sold Agency.
+            </p>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="fixed bottom-0 w-full max-w-[480px] bg-navBg backdrop-blur-md border-t border-appBorder px-6 py-4 flex justify-between items-center z-30 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[32px] transition-colors duration-400">
+        <button class="flex flex-col items-center text-textMain"><i class="ph-fill ph-house text-[26px]"></i></button>
+        <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-users text-[26px]"></i></button>
+        
+        <!-- FAB button -->
+        <button onclick="openActionModal()" class="w-16 h-16 bg-cardDone rounded-full flex items-center justify-center text-[#0B1120] shadow-lg shadow-cardDone/30 transform -translate-y-8 hover:scale-105 transition-transform border-4 border-appBg">
+            <i class="ph-bold ph-plus text-2xl"></i>
+        </button>
+        
+        <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-file-text text-[26px]"></i></button>
+        <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-gear text-[26px]"></i></button>
+    </div>
+
+    <!-- ACTION MODAL (Hidden by default) -->
+    <div id="actionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="actionModalContent">
+            <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-8"></div>
+            <h3 class="text-xl font-bold mb-6 px-2 text-textMain">Quick Actions</h3>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                    <div class="w-14 h-14 bg-cardWaiting/20 rounded-full flex items-center justify-center text-cardWaiting">
+                        <i class="ph-fill ph-user-plus text-3xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-textMain">New Patient</span>
+                </button>
+                <button class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                    <div class="w-14 h-14 bg-cardDone/20 rounded-full flex items-center justify-center text-cardDone">
+                        <i class="ph-fill ph-calendar-plus text-3xl"></i>
+                    </div>
+                    <span class="font-medium text-sm text-textMain">Book Appt</span>
+                </button>
+            </div>
+            <button onclick="closeActionModal()" class="w-full py-4 bg-transparent border border-appBorder rounded-full font-semibold text-textMuted hover:bg-textMuted/10 transition">Close Menu</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1OqkYJl2CikO7y5SJRE4k9n2k3kr7wMGTa9O_eVsAPE82wVL86QJhrogcxGe1Z9LZ/exec"; 
+    
+    let selectedDate = new Date(); 
+
+    // ==========================================
+    // SPLASH SCREEN & AUDIO LOGIC
+    // ==========================================
+    window.onload = () => {
+        // Trigger fade in animations on load
+        setTimeout(() => {
+            document.getElementById('splashLogo').classList.remove('opacity-0', 'scale-50');
+            document.getElementById('splashText').classList.remove('opacity-0', 'translate-y-4');
+            document.getElementById('startBtn').classList.remove('opacity-0', 'translate-y-4');
+        }, 100);
+    };
+
+    function startApp() {
+        // Play soft premium notification chime
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.volume = 0.5; // Soft volume
+        audio.play().catch(e => console.log("Audio play blocked by browser", e));
+        
+        // Fade out splash screen
+        const splash = document.getElementById('splashScreen');
+        splash.style.opacity = '0';
+        
+        // Remove from DOM after transition
+        setTimeout(() => {
+            splash.style.display = 'none';
+        }, 700);
+    }
+
+    // ==========================================
+    // THEME TOGGLE LOGIC
+    // ==========================================
+    function toggleTheme() {
+        const body = document.body;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        if (body.getAttribute('data-theme') === 'light') {
+            body.removeAttribute('data-theme');
+            themeIcon.classList.remove('ph-moon');
+            themeIcon.classList.add('ph-sun');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            themeIcon.classList.remove('ph-sun');
+            themeIcon.classList.add('ph-moon');
+        }
+    }
+
+    // ==========================================
+    // UI INITIALIZATION
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", () => {
+        renderDateSelector();
+        fetchQueueData();
+    });
+
+    function renderDateSelector() {
+        const scroller = document.getElementById('dateScroller');
+        const monthYear = document.getElementById('currentMonthYear');
+        
+        const options = { month: 'long', year: 'numeric' };
+        monthYear.innerText = selectedDate.toLocaleDateString('en-US', options);
+
+        scroller.innerHTML = "";
+        
+        for(let i = -2; i <= 4; i++) {
+            let d = new Date(selectedDate);
+            d.setDate(d.getDate() + i);
+            
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const dateNum = d.getDate();
+            const isToday = i === 0;
+
+            const dateBtn = document.createElement('div');
+            
+            if (isToday) {
+                // Active Day
+                dateBtn.className = `flex flex-col items-center justify-center w-[64px] h-[100px] rounded-full bg-cardDone text-[#0B1120] shadow-[0_10px_20px_rgba(217,244,167,0.15)] transform -translate-y-2 shrink-0 cursor-pointer transition-colors duration-400`;
+                dateBtn.innerHTML = `
+                    <span class="text-[26px] font-extrabold leading-none tracking-tight">${dateNum}</span>
+                    <span class="text-xs font-bold mt-1.5 opacity-80">${dayName}</span>
+                `;
+            } else {
+                // Inactive Day uses semantic theme classes
+                dateBtn.className = `flex flex-col items-center justify-center w-[54px] h-[84px] rounded-full bg-pillDark text-textMuted shrink-0 cursor-pointer border border-appBorder hover:opacity-80 transition-all duration-400`;
+                dateBtn.innerHTML = `
+                    <span class="text-xl font-bold text-textMain">${dateNum}</span>
+                    <span class="text-[10px] font-semibold mt-1">${dayName}</span>
+                `;
+            }
+            scroller.appendChild(dateBtn);
+        }
+    }
+
+    // ==========================================
+    // API CALLS & DATA HANDLING
+    // ==========================================
+    async function fetchQueueData() {
+        const container = document.getElementById('queueContainer');
+        container.innerHTML = `
+            <div class="text-center text-textMuted py-20">
+                <i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i>
+                <p class="font-medium">Loading queue...</p>
+            </div>
+        `;
+
+        if (!GAS_WEB_APP_URL) {
+            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium px-6">Please connect the GAS_WEB_APP_URL to load data.</div>`;
+            return;
+        }
+
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] })
+            });
+            const result = await response.json();
+            if(result.success) renderQueue(result.data);
+            else alert("Error loading queue: " + result.message);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to connect to backend.");
+        }
+    }
+
+    async function advanceStatus(tokenNo, currentStatus) {
+        const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
+        let currentIndex = statusFlow.indexOf(currentStatus);
+        if (currentIndex === -1 || currentIndex === 3) return;
+        let newStatus = statusFlow[currentIndex + 1];
+
+        if (!GAS_WEB_APP_URL) {
+            alert("Please connect the GAS_WEB_APP_URL to perform actions.");
+            return;
+        }
+
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
+            });
+            const result = await response.json();
+            if(result.success) fetchQueueData();
+        } catch(e) { alert("Failed to update status."); }
+    }
+
+    // ==========================================
+    // RENDER LOGIC
+    // ==========================================
+    function renderQueue(queueData) {
+        const container = document.getElementById('queueContainer');
+        container.innerHTML = "";
+
+        if(queueData.length === 0) {
+            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium">No appointments today.</div>`;
+            return;
+        }
+
+        queueData.forEach((appt, index) => {
+            let bgColor, iconClass, nextAction;
+            
+            switch(appt.status) {
+                case 'Done':
+                    bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
+                case 'In Consultation':
+                    bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Mark Done"; break;
+                case 'Waiting':
+                    bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
+                case 'Booked':
+                default:
+                    bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
+            }
+
+            const timeParts = appt.timeSlot.split(' '); 
+            const isLast = index === queueData.length - 1;
+
+            const cardHtml = `
+                <div class="flex h-full">
+                    <!-- Left Column: Time & Dashed Line -->
+                    <div class="w-16 flex flex-col items-center shrink-0 pt-1">
+                        <span class="text-[13px] font-bold text-textMain block">${timeParts[0]}</span>
+                        <span class="text-[10px] font-semibold text-textMuted mb-2">${timeParts[1] ? timeParts[1].toLowerCase() : ''}</span>
+                        ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/40 mb-2"></div>` : `<div class="flex-1"></div>`}
+                    </div>
+
+                    <!-- Right Column: The File Folder Card -->
+                    <div class="flex-1 pl-3 pb-8">
+                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
+                            <i class="ph-fill ${iconClass} text-lg"></i>
+                            ${appt.status}
+                        </div>
+                        
+                        <!-- Main Card Body - Text inside remains Dark for contrast against pastel -->
+                        <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
+                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId}</p>
+                                </div>
+                                <button class="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition">
+                                    <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
+                                <div class="flex -space-x-2">
+                                    <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
+                                    <div class="w-7 h-7 rounded-full bg-[#141E33] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-pill text-[10px] text-white"></i></div>
+                                    <div class="w-7 h-7 rounded-full bg-white/40 border-2 border-${bgColor} flex items-center justify-center text-[10px] font-bold">+</div>
+                                </div>
+                                
+                                ${nextAction ? `
+                                <button onclick="advanceStatus(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition-all flex items-center gap-2 shadow-lg">
+                                    ${nextAction} <i class="ph-bold ph-arrow-right"></i>
+                                </button>
+                                ` : `
+                                <div class="flex items-center gap-2 text-sm font-bold opacity-70">
+                                    <div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%
+                                </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        });
+    }
+
+    // ==========================================
+    // MODAL LOGIC
+    // ==========================================
+    function openActionModal() {
+        const modal = document.getElementById('actionModal');
+        const content = document.getElementById('actionModalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
+    }
+    function closeActionModal() {
+        const modal = document.getElementById('actionModal');
+        const content = document.getElementById('actionModalContent');
+        content.classList.add('translate-y-full');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+</script>
+</body>
+</html>
