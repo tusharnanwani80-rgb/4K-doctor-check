@@ -146,13 +146,61 @@
     </button>
 </div>
 
+<!-- SIDEBAR MENU (HAMBURGER) -->
+<div id="sidebarMenu" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[190] hidden flex">
+    <div id="sidebarContent" class="absolute left-0 top-0 bottom-0 w-3/4 max-w-[320px] bg-appHeader border-r border-appBorder transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-appBorder flex justify-between items-start">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-cardDone/20 text-accentDone rounded-full flex items-center justify-center">
+                    <i class="ph-fill ph-user-md text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-textMain text-base">Dr. R. Pise</h3>
+                    <p class="text-[11px] text-textMuted uppercase tracking-wider font-bold">Clinic Admin</p>
+                </div>
+            </div>
+            <button onclick="closeSidebar()" class="text-textMuted hover:text-textMain transition mt-1"><i class="ph-bold ph-x text-2xl"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+            <p class="text-[10px] font-bold text-textMuted tracking-wider uppercase pl-3 mb-2">Navigation</p>
+            <button onclick="switchView('home'); closeSidebar();" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-pillDark text-textMain transition text-left">
+                <i class="ph-fill ph-house text-2xl text-accentWait"></i> <span class="font-bold text-sm">Dashboard</span>
+            </button>
+            <button onclick="switchView('patients'); closeSidebar();" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-pillDark text-textMain transition text-left">
+                <i class="ph-fill ph-users text-2xl text-accentConsult"></i> <span class="font-bold text-sm">Patient Directory</span>
+            </button>
+            <button onclick="switchView('reports'); closeSidebar();" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-pillDark text-textMain transition text-left">
+                <i class="ph-fill ph-chart-line-up text-2xl text-accentDone"></i> <span class="font-bold text-sm">Clinic Analytics</span>
+            </button>
+            <button onclick="switchView('settings'); closeSidebar();" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-pillDark text-textMain transition text-left">
+                <i class="ph-fill ph-gear text-2xl text-textMuted"></i> <span class="font-bold text-sm">Settings & Sync</span>
+            </button>
+        </div>
+
+        <div class="p-6 border-t border-appBorder bg-pillDark/50 pb-safe">
+            <p class="text-[10px] font-bold text-textMuted tracking-wider uppercase mb-3 text-center">About Developers</p>
+            <a href="https://tusharnanwani80-rgb.github.io/seen-and-sold-check/" target="_blank" class="block w-full p-5 bg-gradient-to-br from-accentWait/10 to-accentConsult/10 border border-appBorder rounded-3xl group hover:border-accentWait/50 transition-colors text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-accentWait/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <i class="ph-fill ph-heart text-accentWait text-3xl mb-3 inline-block group-hover:scale-110 transition-transform"></i>
+                <h4 class="font-extrabold text-textMain text-sm mb-1.5">Loved this app?</h4>
+                <p class="text-[11px] text-textMuted font-medium leading-relaxed">
+                    Give us a rating and explore more premium solutions at <br>
+                    <strong class="text-accentWait font-bold mt-1 inline-block">Seen and Sold Agency</strong>
+                </p>
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- MAIN DASHBOARD CONTAINER -->
 <div class="app-container md:border-x md:border-appBorder md:shadow-2xl" id="mainDashboard">
     
     <!-- HEADER -->
     <div class="px-6 pt-10 pb-4 flex justify-between items-center bg-appHeader rounded-b-[40px] z-20 relative shadow-lg transition-colors duration-400">
         <div>
-            <i class="ph-bold ph-list text-2xl mb-4 block text-textMain cursor-pointer hover:opacity-80"></i>
+            <!-- Added onclick to open sidebar -->
+            <i onclick="openSidebar()" class="ph-bold ph-list text-2xl mb-4 block text-textMain cursor-pointer hover:opacity-80 transition-opacity"></i>
             <h1 class="text-2xl font-bold text-textMain tracking-tight" id="headerTitle">Today's Queue</h1>
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
         </div>
@@ -648,8 +696,22 @@
     });
 
     // ==========================================
-    // SPA NAVIGATION LOGIC
+    // SPA NAVIGATION & SIDEBAR LOGIC
     // ==========================================
+    function openSidebar() {
+        const sidebar = document.getElementById('sidebarMenu');
+        const content = document.getElementById('sidebarContent');
+        sidebar.classList.remove('hidden');
+        setTimeout(() => { content.classList.remove('-translate-x-full'); }, 10);
+    }
+    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebarMenu');
+        const content = document.getElementById('sidebarContent');
+        content.classList.add('-translate-x-full');
+        setTimeout(() => { sidebar.classList.add('hidden'); }, 300);
+    }
+
     function switchView(viewName) {
         // Hide all views
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
