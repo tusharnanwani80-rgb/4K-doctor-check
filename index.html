@@ -1060,7 +1060,8 @@
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         const prettyDate = new Date(date).toLocaleDateString('en-US', options);
 
-        const msg = `Namaste ${patientName} ji! / नमस्ते ${patientName} जी! 🌿\nYour appointment is confirmed. / आपका अपॉइंटमेंट कन्फर्म हो गया है।\n\n📅 Date / तारीख: ${prettyDate}\n🕙 Time / समय: ${time}\n🎟️ Token: #${tokenNo}\n\nTap to add reminder to your phone / रिमाइंडर सेट करने के लिए यहाँ टैप करें:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
+        // BILINGUAL WHATSAPP MESSAGE
+        const msg = `Namaste ${patientName} ji! 🌿\n\nYour appointment is confirmed.\n(आपकी अपॉइंटमेंट पक्की हो गई है।)\n\n📅 Date (तारीख): ${prettyDate}\n🕙 Time (समय): ${time}\n🎟️ Token (टोकन): #${tokenNo}\n\nTap to add reminder to your phone:\n(रिमाइंडर सेट करने के लिए क्लिक करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
 
         document.getElementById('waMessageText').value = msg;
         document.getElementById('waMessageText').dataset.phone = patientPhone || '';
@@ -1512,7 +1513,8 @@
             protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`;
         });
 
-        const msg = `Namaste ${patientName} ji! / नमस्ते ${patientName} जी! 🌿\nYour consultation with Dr. Pise is complete. / आपका परामर्श पूरा हो गया है।\n\nHere is your Treatment Protocol / आपका उपचार प्रोटोकॉल:\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar / अपनी दवाइयां समय पर लेने के लिए कैलेंडर में रिमाइंडर सेट करें:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
+        // BILINGUAL WHATSAPP MESSAGE
+        const msg = `Namaste ${patientName} ji! 🌿\n\nYour consultation is complete.\n(आपका परामर्श पूरा हो गया है।)\n\nHere is your Treatment Protocol:\n(आपकी उपचार विधि:)\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar:\n(दवाइयाँ लेना ना भूलें, रिमाइंडर सेट करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
 
         document.getElementById('rxWaMessageText').value = msg;
         document.getElementById('rxWaMessageText').dataset.phone = patientPhone || '';
