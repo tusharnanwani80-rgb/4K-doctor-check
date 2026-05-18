@@ -1034,7 +1034,7 @@
     }
 
     // ==========================================
-    // WHATSAPP & CALENDAR LOGIC
+    // WHATSAPP & CALENDAR LOGIC (Updated with Hindi)
     // ==========================================
     function generateCalendarLink(dateStr, timeStr) {
         try {
@@ -1060,7 +1060,7 @@
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         const prettyDate = new Date(date).toLocaleDateString('en-US', options);
 
-        const msg = `Namaste ${patientName} ji! 🌿\nYour appointment is confirmed.\n\n📅 Date: ${prettyDate}\n🕙 Time: ${time}\n🎟️ Token: #${tokenNo}\n\nTap to add reminder to your phone:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
+        const msg = `Namaste ${patientName} ji! / नमस्ते ${patientName} जी! 🌿\nYour appointment is confirmed. / आपका अपॉइंटमेंट कन्फर्म हो गया है।\n\n📅 Date / तारीख: ${prettyDate}\n🕙 Time / समय: ${time}\n🎟️ Token: #${tokenNo}\n\nTap to add reminder to your phone / रिमाइंडर सेट करने के लिए यहाँ टैप करें:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
 
         document.getElementById('waMessageText').value = msg;
         document.getElementById('waMessageText').dataset.phone = patientPhone || '';
@@ -1239,8 +1239,9 @@
     }
 
     // ==========================================
-    // PRESCRIPTION ENGINE LOGIC
+    // REST OF CONSULTATION LOGIC
     // ==========================================
+    
     async function fetchRemedyMaster() {
         if (!GAS_WEB_APP_URL) {
             masterRemedyList = [
@@ -1479,7 +1480,6 @@
                 closeConsultationRoom(); 
                 fetchQueueData(); 
                 
-                // SAFE FALLBACK added here
                 const pName = (data.data && data.data.name) ? data.data.name : currentActiveConsult.patientName;
                 const pPhone = (data.data && data.data.phone) ? data.data.phone : "9100000000"; 
                 showPrescriptionSuccess(pName, pPhone, activeProtocol);
@@ -1489,7 +1489,7 @@
         finally { btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription`; btn.disabled = false; }
     }
 
-    // Prescription Success Handlers
+    // Prescription Success Handlers (Updated with Hindi)
     function generateHerbReminderLink() {
         try {
             const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
@@ -1512,7 +1512,7 @@
             protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`;
         });
 
-        const msg = `Namaste ${patientName} ji! 🌿\nYour consultation with Dr. Pise is complete.\n\nHere is your Treatment Protocol:\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
+        const msg = `Namaste ${patientName} ji! / नमस्ते ${patientName} जी! 🌿\nYour consultation with Dr. Pise is complete. / आपका परामर्श पूरा हो गया है।\n\nHere is your Treatment Protocol / आपका उपचार प्रोटोकॉल:\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar / अपनी दवाइयां समय पर लेने के लिए कैलेंडर में रिमाइंडर सेट करें:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
 
         document.getElementById('rxWaMessageText').value = msg;
         document.getElementById('rxWaMessageText').dataset.phone = patientPhone || '';
