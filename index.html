@@ -827,6 +827,20 @@
     // ==========================================
     // UTILS & QUEUE
     // ==========================================
+    
+    // Helper formatter for time values that got incorrectly parsed by Google Sheets as full date objects.
+    function formatTimeDisplay(timeVal) {
+        if (!timeVal) return "";
+        let str = String(timeVal);
+        if (str.includes("T") && str.includes("Z")) {
+            try {
+                let d = new Date(str);
+                return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            } catch(e) {}
+        }
+        return str;
+    }
+
     function renderDateSelector() {
         const scroller = document.getElementById('dateScroller');
         document.getElementById('currentMonthYear').innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -1017,12 +1031,14 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
-                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${appt.timeSlot}</p>
+                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${formatTimeDisplay(appt.timeSlot)}</p>
                                 </div>
                             </div>
                             <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
                                 <div class="flex -space-x-2">
-                                    <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
+                                    <button onclick="openPatientHistoryFromDirectory('${appt.patientId}', '${appt.patientName}')" class="w-8 h-8 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center hover:scale-110 transition-transform cursor-pointer shadow-md" title="View Patient History">
+                                        <i class="ph-fill ph-file-text text-[12px] text-white"></i>
+                                    </button>
                                 </div>
                                 ${btnHtml}
                             </div>
