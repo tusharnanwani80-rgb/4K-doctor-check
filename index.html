@@ -403,6 +403,33 @@
     </div>
 </div>
 
+<!-- Prescription Success Modal (NEW) -->
+<div id="prescriptionSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="prescriptionSuccessModalContent">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-cardConsult/20 text-accentConsult rounded-full flex items-center justify-center"><i class="ph-fill ph-paper-plane-tilt text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-textMain">Prescription Sent!</h3>
+            </div>
+            <button onclick="closeModal('prescriptionSuccessModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        
+        <p class="text-[11px] font-bold text-textMuted mb-2 uppercase tracking-wide flex items-center gap-1"><i class="ph-fill ph-envelope-simple text-accentWait"></i> Email sent automatically. Share via WhatsApp:</p>
+        <div class="bg-inputBg border border-appBorder rounded-2xl p-4 mb-6">
+            <textarea id="rxWaMessageText" readonly rows="8" class="w-full bg-transparent text-sm font-medium text-textMain border-none resize-none focus:ring-0 p-0"></textarea>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="copyRxWaMessage()" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/10 transition">
+                <i class="ph-bold ph-copy"></i> Copy
+            </button>
+            <button onclick="sendRxWaMessage()" class="w-2/3 py-4 bg-[#25D366] text-white rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-[#25D366]/20">
+                <i class="ph-bold ph-whatsapp-logo text-xl"></i> Send to Patient
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- TEMPLATE MODAL -->
 <div id="templateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[165] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder h-[75vh] flex flex-col" id="templateModalContent">
@@ -1461,12 +1488,13 @@
 
         if(!GAS_WEB_APP_URL) {
             setTimeout(() => {
-                showToast("Prescription Saved & Sent!", "success");
+                showToast("Prescription Saved!", "success");
                 closeConsultationRoom();
                 const item = currentQueueData.find(q => q.tokenNo === currentActiveConsult.tokenNo);
                 if(item) item.status = "Done";
                 renderQueue();
                 btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription`; btn.disabled = false;
+                showPrescriptionSuccess(currentActiveConsult.patientName, "9876543210", activeProtocol);
             }, 1000);
             return;
         }
@@ -1474,10 +1502,60 @@
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
-            if(data.success) { showToast("Prescription Saved & Sent!", "success"); closeConsultationRoom(); fetchQueueData(); } 
+            if(data.success) { 
+                showToast("Prescription Saved & Sent!", "success"); 
+                closeConsultationRoom(); 
+                fetchQueueData(); 
+                // Open WhatsApp & Calendar Sharing Modal
+                showPrescriptionSuccess(data.data.name, data.data.phone, activeProtocol);
+            } 
             else { showToast(data.message, "error"); }
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally { btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription`; btn.disabled = false; }
+    }
+
+    // Prescription Success Handlers
+    function generateHerbReminderLink() {
+        try {
+            const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
+            let startDt = new Date();
+            startDt.setDate(startDt.getDate() + 1); // Start tomorrow
+            startDt.setHours(8, 0, 0); // 8 AM default
+            let endDt = new Date(startDt.getTime() + 15*60000); // 15 mins
+            
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Time+for+Naturopathy+Herbs%F0%9F%8C%BF&dates=${fmt(startDt)}/${fmt(endDt)}&details=Daily+reminder+to+take+your+herbs+prescribed+by+Dr.+Pise.`;
+        } catch(e) {
+            return "https://calendar.google.com/";
+        }
+    }
+
+    function showPrescriptionSuccess(patientName, patientPhone, protocolList) {
+        const calLink = generateHerbReminderLink();
+        
+        let protocolStr = "";
+        protocolList.forEach(item => {
+            protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`;
+        });
+
+        const msg = `Namaste ${patientName} ji! 🌿\nYour consultation with Dr. Pise is complete.\n\nHere is your Treatment Protocol:\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
+
+        document.getElementById('rxWaMessageText').value = msg;
+        document.getElementById('rxWaMessageText').dataset.phone = patientPhone || '';
+        
+        openModal('prescriptionSuccessModal');
+    }
+
+    function copyRxWaMessage() {
+        const msg = document.getElementById('rxWaMessageText').value;
+        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
+    }
+
+    function sendRxWaMessage() {
+        const msg = encodeURIComponent(document.getElementById('rxWaMessageText').value);
+        let phone = document.getElementById('rxWaMessageText').dataset.phone;
+        phone = phone.replace(/\D/g, '');
+        if (phone.length === 10) phone = '91' + phone; 
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
 
     async function openPatientHistory() {
