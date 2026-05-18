@@ -231,7 +231,7 @@
         </div>
     </div>
 
-    <!-- ==================== VIEW 2: PATIENTS (With Quick Rx) ==================== -->
+    <!-- ==================== VIEW 2: PATIENTS (With Direct Consult) ==================== -->
     <div id="view-patients" class="view-section pt-8 px-4">
         <div class="relative mb-6">
             <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
@@ -882,7 +882,7 @@
                     </div>
                 </div>
                 <button onclick="openQuickRx('${p.patientId}', '${p.name}')" class="bg-accentWait/10 hover:bg-accentWait text-accentWait hover:text-[#0B1120] rounded-xl px-3 py-2 text-xs font-bold flex items-center gap-1 transition-colors border border-accentWait/20 shadow-sm shrink-0">
-                    <i class="ph-fill ph-lightning"></i> Quick Rx
+                    <i class="ph-fill ph-lightning"></i> Direct Consult
                 </button>
             </div>
         `).join('');
@@ -899,7 +899,7 @@
         openPatientHistory();
     }
 
-    // GODMODE: QUICK RX
+    // GODMODE: DIRECT CONSULT
     function openQuickRx(pId, pName) {
         const mockAppt = { patientId: pId, patientName: pName, tokenNo: 'Direct' };
         openConsultationRoom(mockAppt);
