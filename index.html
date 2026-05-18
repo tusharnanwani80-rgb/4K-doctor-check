@@ -107,7 +107,6 @@
         .slide-up-active { transform: translateY(0); }
         .slide-up-hidden { transform: translateY(100%); }
 
-        /* SPA View Transitions */
         .view-section {
             display: none;
             animation: fadeIn 0.3s ease forwards;
@@ -120,7 +119,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Custom Scrollbar for Textarea */
         textarea::-webkit-scrollbar { width: 6px; }
         textarea::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     </style>
@@ -146,7 +144,7 @@
     </button>
 </div>
 
-<!-- SIDEBAR MENU (HAMBURGER) -->
+<!-- SIDEBAR MENU -->
 <div id="sidebarMenu" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[190] hidden flex">
     <div id="sidebarContent" class="absolute left-0 top-0 bottom-0 w-3/4 max-w-[320px] bg-appHeader border-r border-appBorder transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
         <div class="p-6 border-b border-appBorder flex justify-between items-start">
@@ -199,7 +197,6 @@
     <!-- HEADER -->
     <div class="px-6 pt-10 pb-4 flex justify-between items-center bg-appHeader rounded-b-[40px] z-20 relative shadow-lg transition-colors duration-400">
         <div>
-            <!-- Added onclick to open sidebar -->
             <i onclick="openSidebar()" class="ph-bold ph-list text-2xl mb-4 block text-textMain cursor-pointer hover:opacity-80 transition-opacity"></i>
             <h1 class="text-2xl font-bold text-textMain tracking-tight" id="headerTitle">Today's Queue</h1>
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
@@ -213,18 +210,14 @@
 
     <!-- ==================== VIEW 1: HOME (QUEUE) ==================== -->
     <div id="view-home" class="view-section active">
-        <!-- DATE SELECTOR -->
         <div class="pt-8 pb-6 bg-appBg sticky top-0 z-10 transition-colors duration-400">
             <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer">
                 <h2 class="text-xl font-medium text-textMain" id="currentMonthYear">May 2026</h2>
                 <i class="ph-bold ph-caret-down text-textMuted"></i>
             </div>
-            <div class="flex space-x-3 overflow-x-auto no-scrollbar px-6 items-end h-[110px]" id="dateScroller">
-                <!-- Dates injected via JS -->
-            </div>
+            <div class="flex space-x-3 overflow-x-auto no-scrollbar px-6 items-end h-[110px]" id="dateScroller"></div>
         </div>
 
-        <!-- MAIN QUEUE TIMELINE -->
         <div class="px-4 mt-2 relative z-0">
             <div id="queueContainer" class="space-y-0">
                 <div class="text-center text-textMuted py-20" id="loadingState">
@@ -374,9 +367,9 @@
     </div>
 </div>
 
-<!-- ALL MODALS (Template, History, Remedy, Actions, New Patient, Book Appt, WhatsApp) -->
+<!-- ALL MODALS -->
 
-<!-- WhatsApp / Calendar Success Modal (NEW) -->
+<!-- WhatsApp / Calendar Success Modal (For Booking) -->
 <div id="bookingSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="bookingSuccessModalContent">
         <div class="flex justify-between items-center mb-6">
@@ -403,7 +396,7 @@
     </div>
 </div>
 
-<!-- Prescription Success Modal (NEW) -->
+<!-- Prescription Success Modal (For Send Prescription) -->
 <div id="prescriptionSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="prescriptionSuccessModalContent">
         <div class="flex justify-between items-center mb-6">
@@ -667,7 +660,7 @@
     document.getElementById('baDate').value = selectedDate.toISOString().split('T')[0];
 
     let currentQueueData = []; 
-    let allPatientsDirectory = []; // For the patients tab
+    let allPatientsDirectory = []; 
     
     let masterRemedyList = []; 
     let masterTemplateList = []; 
@@ -719,7 +712,7 @@
         fetchQueueData();
         fetchRemedyMaster(); 
         fetchTemplates();
-        fetchAllPatients(); // Prefetch directory
+        fetchAllPatients(); 
     });
 
     // ==========================================
@@ -740,9 +733,7 @@
     }
 
     function switchView(viewName) {
-        // Hide all views
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        // Reset nav buttons
         ['home', 'patients', 'reports', 'settings'].forEach(nav => {
             const btn = document.getElementById(`nav-${nav}`);
             const icon = btn.querySelector('i');
@@ -752,14 +743,11 @@
             dot.className = "w-1 h-1 bg-transparent rounded-full mt-1";
         });
 
-        // Show target view
         document.getElementById(`view-${viewName}`).classList.add('active');
         
-        // Update header title
         const titles = { 'home': "Today's Queue", 'patients': "Patient Directory", 'reports': "Clinic Reports", 'settings': "Settings" };
         document.getElementById('headerTitle').innerText = titles[viewName];
 
-        // Active nav styling
         const activeBtn = document.getElementById(`nav-${viewName}`);
         const activeIcon = activeBtn.querySelector('i');
         const activeDot = activeBtn.querySelector('div');
@@ -790,7 +778,6 @@
             return;
         }
         try {
-            // Using searchPatient with empty string to get all (if backend supports includes(""))
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'searchPatient', query: '' }) });
             const data = await res.json();
             if(data.success) {
@@ -833,7 +820,6 @@
     }
 
     function openPatientHistoryFromDirectory(pId, pName) {
-        // Create a dummy consult object to satisfy the history modal's requirement
         currentActiveConsult = { patientId: pId, patientName: pName, tokenNo: '-' };
         openPatientHistory();
     }
@@ -854,7 +840,6 @@
             const isToday = i === 0;
             const dateBtn = document.createElement('div');
             
-            // Add click handler to change date and refetch!
             dateBtn.onclick = () => {
                 selectedDate = new Date(d);
                 renderDateSelector();
@@ -1053,7 +1038,6 @@
     // ==========================================
     function generateCalendarLink(dateStr, timeStr) {
         try {
-            // Very simple parser for e.g. "10:30 AM"
             let [time, modifier] = timeStr.split(' ');
             let [hours, minutes] = time.split(':');
             hours = parseInt(hours, 10);
@@ -1062,9 +1046,8 @@
 
             let startDt = new Date(dateStr);
             startDt.setHours(hours, parseInt(minutes), 0);
-            let endDt = new Date(startDt.getTime() + 30*60000); // assume 30m appointment
+            let endDt = new Date(startDt.getTime() + 30*60000);
 
-            // Format to UTC string expected by Google: YYYYMMDDTHHmmssZ
             const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
             return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`;
         } catch(e) {
@@ -1074,16 +1057,12 @@
 
     function showBookingSuccess(patientName, date, time, tokenNo, patientPhone) {
         const calLink = generateCalendarLink(date, time);
-        
-        // Pretty format date
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         const prettyDate = new Date(date).toLocaleDateString('en-US', options);
 
         const msg = `Namaste ${patientName} ji! 🌿\nYour appointment is confirmed.\n\n📅 Date: ${prettyDate}\n🕙 Time: ${time}\n🎟️ Token: #${tokenNo}\n\nTap to add reminder to your phone:\n${calLink}\n\n— Dr. Pise from Naturopathy Clinic`;
 
         document.getElementById('waMessageText').value = msg;
-        
-        // Store phone number for WA button
         document.getElementById('waMessageText').dataset.phone = patientPhone || '';
         
         switchModal('bookApptModal', 'bookingSuccessModal');
@@ -1091,18 +1070,14 @@
 
     function copyWaMessage() {
         const msg = document.getElementById('waMessageText').value;
-        navigator.clipboard.writeText(msg).then(() => {
-            showToast("Message Copied!");
-        });
+        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
     }
 
     function sendWaMessage() {
         const msg = encodeURIComponent(document.getElementById('waMessageText').value);
         let phone = document.getElementById('waMessageText').dataset.phone;
-        // Clean phone number: remove anything that isn't a digit. Add country code if missing (assuming India 91 for this example if exactly 10 digits)
         phone = phone.replace(/\D/g, '');
         if (phone.length === 10) phone = '91' + phone; 
-        
         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
 
@@ -1145,7 +1120,7 @@
                 form.reset();
                 btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText;
                 btnSave.disabled = false; btnSaveBook.disabled = false;
-                fetchAllPatients(); // Refresh directory
+                fetchAllPatients(); 
             }, 1000);
             return;
         }
@@ -1207,7 +1182,6 @@
         } catch(e) { resBox.innerHTML = `<div class="p-4 text-center text-xs text-red-400">Search failed.</div>`; }
     }
 
-    // Notice we now pass phone number too!
     let currentBookingPhone = "";
     function selectPatient(id, name, phone) {
         document.getElementById('baPatientId').value = id;
@@ -1265,10 +1239,8 @@
     }
 
     // ==========================================
-    // REST OF CONSULTATION LOGIC (Remedy, Templates, History)
-    // (Kept completely intact as built previously)
+    // PRESCRIPTION ENGINE LOGIC
     // ==========================================
-    
     async function fetchRemedyMaster() {
         if (!GAS_WEB_APP_URL) {
             masterRemedyList = [
@@ -1506,8 +1478,11 @@
                 showToast("Prescription Saved & Sent!", "success"); 
                 closeConsultationRoom(); 
                 fetchQueueData(); 
-                // Open WhatsApp & Calendar Sharing Modal
-                showPrescriptionSuccess(data.data.name, data.data.phone, activeProtocol);
+                
+                // SAFE FALLBACK added here
+                const pName = (data.data && data.data.name) ? data.data.name : currentActiveConsult.patientName;
+                const pPhone = (data.data && data.data.phone) ? data.data.phone : "9100000000"; 
+                showPrescriptionSuccess(pName, pPhone, activeProtocol);
             } 
             else { showToast(data.message, "error"); }
         } catch(err) { showToast("Connection failed.", "error"); } 
@@ -1519,9 +1494,9 @@
         try {
             const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
             let startDt = new Date();
-            startDt.setDate(startDt.getDate() + 1); // Start tomorrow
-            startDt.setHours(8, 0, 0); // 8 AM default
-            let endDt = new Date(startDt.getTime() + 15*60000); // 15 mins
+            startDt.setDate(startDt.getDate() + 1); 
+            startDt.setHours(8, 0, 0); 
+            let endDt = new Date(startDt.getTime() + 15*60000); 
             
             return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Time+for+Naturopathy+Herbs%F0%9F%8C%BF&dates=${fmt(startDt)}/${fmt(endDt)}&details=Daily+reminder+to+take+your+herbs+prescribed+by+Dr.+Pise.`;
         } catch(e) {
