@@ -73,13 +73,13 @@
         .folder-tab { border-bottom-right-radius: 0; margin-bottom: -1px; position: relative; z-index: 10; }
         
         /* Form Inputs */
-        input, select {
+        input, select, textarea {
             background-color: var(--input-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             outline: none;
         }
-        input:focus, select:focus { border-color: #8DE3FE; }
+        input:focus, select:focus, textarea:focus { border-color: #8DE3FE; }
         
         /* Animation for optimistic UI updates */
         @keyframes popIn {
@@ -90,6 +90,10 @@
         .card-update-anim {
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        
+        /* Slide-up full screen animation */
+        .slide-up-active { transform: translateY(0); }
+        .slide-up-hidden { transform: translateY(100%); }
     </style>
 </head>
 <body>
@@ -113,12 +117,13 @@
     </button>
 </div>
 
-<div class="app-container md:border-x md:border-appBorder md:shadow-2xl">
+<!-- MAIN DASHBOARD -->
+<div class="app-container md:border-x md:border-appBorder md:shadow-2xl" id="mainDashboard">
     
     <!-- HEADER -->
     <div class="px-6 pt-10 pb-4 flex justify-between items-center bg-appHeader rounded-b-[40px] z-20 relative shadow-lg transition-colors duration-400">
         <div>
-            <i class="ph-bold ph-arrow-left text-xl mb-4 block text-textMain"></i>
+            <i class="ph-bold ph-list text-2xl mb-4 block text-textMain cursor-pointer hover:opacity-80"></i>
             <h1 class="text-2xl font-bold text-textMain tracking-tight">Today's Queue</h1>
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
         </div>
@@ -149,7 +154,6 @@
             </div>
         </div>
         
-        <!-- AGENCY FOOTER -->
         <div class="text-center pt-10 pb-20">
             <p class="text-[10px] font-bold tracking-[0.15em] text-textMuted/50 uppercase">
                 This app was made by Seen and Sold Agency.
@@ -159,7 +163,7 @@
 
     <!-- BOTTOM NAVIGATION -->
     <div class="fixed bottom-0 w-full max-w-[480px] bg-navBg backdrop-blur-md border-t border-appBorder px-6 py-4 flex justify-between items-center z-30 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.1)] rounded-t-[32px] transition-colors duration-400">
-        <button class="flex flex-col items-center text-textMain"><i class="ph-fill ph-house text-[26px]"></i></button>
+        <button onclick="scrollToCurrent()" class="flex flex-col items-center text-textMain"><i class="ph-fill ph-house text-[26px]"></i></button>
         <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-users text-[26px]"></i></button>
         
         <!-- FAB button -->
@@ -171,126 +175,319 @@
         <button class="flex flex-col items-center text-textMuted hover:text-textMain transition"><i class="ph ph-gear text-[26px]"></i></button>
     </div>
 
-    <!-- 1. QUICK ACTIONS MODAL -->
-    <div id="actionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden flex flex-col justify-end max-w-[480px] mx-auto">
-        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="actionModalContent">
-            <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-8"></div>
-            <h3 class="text-xl font-bold mb-6 px-2 text-textMain">Quick Actions</h3>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <button onclick="switchModal('actionModal', 'newPatientModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
-                    <div class="w-14 h-14 bg-cardWaiting/20 rounded-full flex items-center justify-center text-cardWaiting">
-                        <i class="ph-fill ph-user-plus text-3xl"></i>
-                    </div>
-                    <span class="font-medium text-sm text-textMain">New Patient</span>
-                </button>
-                <button onclick="switchModal('actionModal', 'bookApptModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
-                    <div class="w-14 h-14 bg-cardDone/20 rounded-full flex items-center justify-center text-cardDone">
-                        <i class="ph-fill ph-calendar-plus text-3xl"></i>
-                    </div>
-                    <span class="font-medium text-sm text-textMain">Book Appt</span>
-                </button>
+</div>
+
+<!-- FULL SCREEN CONSULTATION ROOM -->
+<div id="consultationRoom" class="fixed inset-0 bg-appBg z-[150] slide-up-hidden transition-transform duration-500 ease-in-out flex flex-col max-w-[480px] mx-auto w-full">
+    
+    <!-- Header -->
+    <div class="bg-appHeader pt-10 pb-6 px-6 rounded-b-[32px] shadow-lg shrink-0 border-b border-appBorder">
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="closeConsultationRoom()" class="w-10 h-10 bg-pillDark rounded-full flex items-center justify-center text-textMain hover:bg-black/20 transition"><i class="ph-bold ph-x text-lg"></i></button>
+            <div class="text-xs font-black tracking-widest uppercase bg-cardConsult/20 text-cardConsult px-4 py-1.5 rounded-full border border-cardConsult/30">Active Consult</div>
+            <div class="w-10"></div> <!-- Spacer -->
+        </div>
+        
+        <h2 id="consultPatName" class="text-3xl font-extrabold tracking-tight text-textMain mb-1">Patient Name</h2>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span id="consultPatId" class="text-sm font-bold text-textMuted">ID: NCC-000</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-textMuted/50"></div>
+                <span id="consultToken" class="text-sm font-bold text-cardWaiting">Token #0</span>
             </div>
-            <button onclick="closeModal('actionModal')" class="w-full py-4 bg-transparent border border-appBorder rounded-full font-semibold text-textMuted hover:bg-textMuted/10 transition">Cancel</button>
+            <button onclick="openPatientHistory()" class="bg-cardWaiting/10 text-cardWaiting px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 hover:bg-cardWaiting/20 transition">
+                <i class="ph-bold ph-clock-counter-clockwise"></i> History
+            </button>
         </div>
     </div>
 
-    <!-- 2. NEW PATIENT MODAL -->
-    <div id="newPatientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
-        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="newPatientModalContent">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-textMain">Register Patient</h3>
-                <button onclick="closeModal('newPatientModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted"><i class="ph-bold ph-x"></i></button>
+    <!-- Scrollable Body -->
+    <div class="flex-1 overflow-y-auto px-6 py-6 pb-32">
+        
+        <!-- Chief Complaint Section -->
+        <div class="mb-8">
+            <label class="text-[11px] font-bold text-textMuted tracking-wider mb-2 block uppercase">Chief Complaint & Diagnosis</label>
+            <textarea id="consultComplaint" rows="3" class="w-full rounded-[20px] p-4 text-sm font-medium resize-none shadow-sm placeholder:text-textMuted/50" placeholder="E.g., Severe acidity after meals, poor sleep..."></textarea>
+        </div>
+
+        <!-- Protocol Builder Section -->
+        <div class="mb-4 flex justify-between items-end">
+            <label class="text-[11px] font-bold text-textMuted tracking-wider block uppercase">Treatment Protocol</label>
+            <div class="flex gap-2">
+                <button onclick="openTemplateModal()" class="text-xs font-bold text-cardConsult flex items-center gap-1 bg-cardConsult/10 px-3 py-1 rounded-full hover:bg-cardConsult/20 transition"><i class="ph-bold ph-magic-wand"></i> Templates</button>
+                <button onclick="openRemedySearch()" class="text-xs font-bold text-cardWaiting flex items-center gap-1 bg-cardWaiting/10 px-3 py-1 rounded-full hover:bg-cardWaiting/20 transition"><i class="ph-bold ph-plus"></i> Add Item</button>
             </div>
-            
-            <form id="newPatientForm" onsubmit="submitNewPatient(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">FULL NAME</label>
-                    <input type="text" id="npName" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. Ramesh Kumar">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PHONE NUMBER</label>
-                    <input type="tel" id="npPhone" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. 9876543210">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">EMAIL (Optional)</label>
-                    <input type="email" id="npEmail" class="w-full px-5 py-4 rounded-2xl" placeholder="For calendar invites">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">AGE</label>
-                        <input type="number" id="npAge" required class="w-full px-5 py-4 rounded-2xl" placeholder="Age">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">GENDER</label>
-                        <select id="npGender" required class="w-full px-5 py-4 rounded-2xl appearance-none">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" id="btnSubmitPatient" class="w-full mt-4 py-4 bg-cardWaiting text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90">
-                    <i class="ph-bold ph-check"></i> Save Patient Record
-                </button>
-            </form>
+        </div>
+
+        <!-- Empty State / Selected Items List -->
+        <div id="protocolList" class="space-y-3">
+            <div id="emptyProtocolState" class="border-2 border-dashed border-appBorder rounded-[24px] p-8 text-center text-textMuted flex flex-col items-center justify-center bg-pillDark/30">
+                <i class="ph-bold ph-prescription text-3xl mb-2 opacity-50"></i>
+                <p class="text-sm font-medium">No remedies added yet.</p>
+                <p class="text-[11px] mt-1 opacity-70">Search for herbs, diets, or therapies above.</p>
+            </div>
+            <!-- Selected items will be injected here -->
+        </div>
+
+        <!-- Notes -->
+        <div class="mt-8">
+            <label class="text-[11px] font-bold text-textMuted tracking-wider mb-2 block uppercase">Private Doctor Notes</label>
+            <textarea id="consultNotes" rows="2" class="w-full rounded-[20px] p-4 text-sm font-medium resize-none shadow-sm placeholder:text-textMuted/50" placeholder="Notes for next visit (Not visible to patient)"></textarea>
         </div>
     </div>
 
-    <!-- 3. BOOK APPOINTMENT MODAL -->
-    <div id="bookApptModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
-        <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="bookApptModalContent">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-textMain">Book Appointment</h3>
-                <button onclick="closeModal('bookApptModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted"><i class="ph-bold ph-x"></i></button>
+    <!-- Floating Action Button Area -->
+    <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-appBg via-appBg to-transparent shrink-0 pt-12">
+        <button onclick="finalizeConsultation()" id="btnFinalize" class="w-full py-4 bg-cardDone text-[#0B1120] rounded-[24px] font-extrabold text-lg flex justify-center items-center gap-2 shadow-[0_10px_20px_rgba(217,244,167,0.15)] hover:scale-[1.02] active:scale-[0.98] transition-transform">
+            <i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription
+        </button>
+    </div>
+</div>
+
+<!-- REMEDY SEARCH BOTTOM SHEET (Inside Consult Room) -->
+<div id="remedyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[160] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder h-[85vh] flex flex-col" id="remedyModalContent">
+        <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-6 shrink-0"></div>
+        <div class="flex justify-between items-center mb-4 shrink-0">
+            <h3 class="text-xl font-bold text-textMain">Add to Protocol</h3>
+            <button onclick="closeRemedySearch()" class="text-textMuted hover:text-white transition"><i class="ph-bold ph-x text-2xl"></i></button>
+        </div>
+        
+        <div class="relative mb-4 shrink-0">
+            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
+            <input type="text" id="rmSearch" onkeyup="filterRemedies()" autocomplete="off" class="w-full pl-12 pr-5 py-3.5 rounded-2xl text-sm" placeholder="Search herbs, churnas, diet...">
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-4 shrink-0" id="categoryFilters">
+            <button onclick="setCategoryFilter('All')" class="category-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-textMain text-appBg shrink-0 transition">All</button>
+            <button onclick="setCategoryFilter('Herb')" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition">Herb</button>
+            <button onclick="setCategoryFilter('Diet')" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition">Diet</button>
+            <button onclick="setCategoryFilter('Yoga')" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition">Yoga</button>
+            <button onclick="setCategoryFilter('Therapy')" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition">Therapy</button>
+        </div>
+
+        <!-- Search Results Area -->
+        <div class="flex-1 overflow-y-auto space-y-2" id="remedyResultsList">
+            <div class="text-center text-textMuted py-10"><i class="ph ph-spinner-gap animate-spin text-2xl mb-2 inline-block"></i><p class="text-sm">Loading remedies...</p></div>
+        </div>
+
+        <!-- NEW: Add Custom Medicine Button & Add to Treatment Button -->
+        <div class="mt-4 pt-4 border-t border-appBorder shrink-0 pb-safe">
+            <div id="addTreatmentBtnContainer" class="mb-3 hidden">
+                <button onclick="commitTreatment()" class="w-full py-4 bg-cardDone text-[#0B1120] rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-cardDone/20">
+                    <i class="ph-bold ph-check-circle text-xl"></i> <span id="addTreatmentBtnSpan">Add to Treatment</span>
+                </button>
+            </div>
+            <button onclick="openCustomRemedyModal()" class="w-full py-4 bg-pillDark border border-dashed border-textMuted/50 text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/20 transition">
+                <i class="ph-bold ph-plus-circle text-lg"></i> Can't find it? Add Custom
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: CUSTOM REMEDY MODAL -->
+<div id="customRemedyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[170] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="customRemedyModalContent">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-textMain">Custom Remedy</h3>
+            <button onclick="closeModal('customRemedyModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted hover:text-white transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">REMEDY NAME</label>
+                <input type="text" id="crName" class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. Special Ginger Tea">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">CATEGORY</label>
+                    <select id="crCategory" class="w-full px-5 py-4 rounded-2xl appearance-none">
+                        <option value="Herb">Herb</option>
+                        <option value="Diet">Diet</option>
+                        <option value="Yoga">Yoga</option>
+                        <option value="Therapy">Therapy</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">DOSE (Optional)</label>
+                    <input type="text" id="crDose" class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. 1 cup">
+                </div>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">TIMING (Optional)</label>
+                <input type="text" id="crTiming" class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. Morning empty stomach">
             </div>
             
-            <form id="bookApptForm" onsubmit="submitBooking(event)" class="space-y-4">
+            <button onclick="addCustomRemedy()" class="w-full mt-2 py-4 bg-cardDone text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90">
+                <i class="ph-bold ph-check"></i> Add to Protocol
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: TEMPLATE MODAL -->
+<div id="templateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[165] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder h-[75vh] flex flex-col" id="templateModalContent">
+        <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-6 shrink-0"></div>
+        <div class="flex justify-between items-center mb-4 shrink-0">
+            <h3 class="text-xl font-bold text-textMain">Disease Templates</h3>
+            <button onclick="closeTemplateModal()" class="text-textMuted hover:text-white transition"><i class="ph-bold ph-x text-2xl"></i></button>
+        </div>
+        
+        <div class="relative mb-4 shrink-0">
+            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
+            <input type="text" id="tplSearch" onkeyup="filterTemplates()" autocomplete="off" class="w-full pl-12 pr-5 py-3.5 rounded-2xl text-sm" placeholder="Search templates (e.g. Acidity)...">
+        </div>
+
+        <div class="flex-1 overflow-y-auto space-y-2 pb-safe" id="templateList">
+            <div class="text-center text-textMuted py-10"><i class="ph ph-spinner-gap animate-spin text-2xl mb-2 inline-block"></i><p class="text-sm">Loading templates...</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: PATIENT HISTORY MODAL -->
+<div id="historyModal" class="fixed inset-0 bg-appBg z-[175] slide-up-hidden transition-transform duration-500 ease-in-out flex flex-col max-w-[480px] mx-auto w-full">
+    <div class="bg-appHeader pt-10 pb-4 px-6 rounded-b-[32px] shadow-lg shrink-0 border-b border-appBorder">
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="closeHistoryModal()" class="w-10 h-10 bg-pillDark rounded-full flex items-center justify-center text-textMain hover:bg-black/20 transition"><i class="ph-bold ph-arrow-left text-lg"></i></button>
+            <h3 class="text-lg font-bold text-textMain">Patient History</h3>
+            <div class="w-10"></div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="flex bg-pillDark p-1 rounded-2xl mb-2">
+            <button onclick="switchHistoryTab('consults')" id="tabConsults" class="flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm">Past Consults</button>
+            <button onclick="switchHistoryTab('reports')" id="tabReports" class="flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain">Lab Reports</button>
+        </div>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto px-6 py-6 pb-10" id="historyContentArea">
+        <!-- Injected via JS -->
+    </div>
+</div>
+
+<!-- 1. QUICK ACTIONS MODAL -->
+<div id="actionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="actionModalContent">
+        <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-8"></div>
+        <h3 class="text-xl font-bold mb-6 px-2 text-textMain">Quick Actions</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button onclick="switchModal('actionModal', 'newPatientModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                <div class="w-14 h-14 bg-cardWaiting/20 rounded-full flex items-center justify-center text-cardWaiting"><i class="ph-fill ph-user-plus text-3xl"></i></div>
+                <span class="font-medium text-sm text-textMain">New Patient</span>
+            </button>
+            <button onclick="switchModal('actionModal', 'bookApptModal')" class="bg-pillDark p-5 rounded-[28px] flex flex-col items-center justify-center gap-3 hover:opacity-80 transition border border-appBorder">
+                <div class="w-14 h-14 bg-cardDone/20 rounded-full flex items-center justify-center text-cardDone"><i class="ph-fill ph-calendar-plus text-3xl"></i></div>
+                <span class="font-medium text-sm text-textMain">Book Appt</span>
+            </button>
+        </div>
+        <button onclick="closeModal('actionModal')" class="w-full py-4 bg-transparent border border-appBorder rounded-full font-semibold text-textMuted hover:bg-textMuted/10 transition">Cancel</button>
+    </div>
+</div>
+
+<!-- 2. NEW PATIENT MODAL -->
+<div id="newPatientModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="newPatientModalContent">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-textMain">Register Patient</h3>
+            <button onclick="closeModal('newPatientModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted hover:text-white transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        
+        <form id="newPatientForm" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">FULL NAME</label>
+                <input type="text" id="npName" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. Ramesh Kumar">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PHONE NUMBER</label>
+                <input type="tel" id="npPhone" required class="w-full px-5 py-4 rounded-2xl" placeholder="e.g. 9876543210">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">EMAIL (Optional)</label>
+                <input type="email" id="npEmail" class="w-full px-5 py-4 rounded-2xl" placeholder="For calendar invites">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">AGE</label>
+                    <input type="number" id="npAge" required class="w-full px-5 py-4 rounded-2xl" placeholder="Age">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">GENDER</label>
+                    <select id="npGender" required class="w-full px-5 py-4 rounded-2xl appearance-none">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- NEW: Split Buttons for Save vs Save & Book -->
+            <div class="flex gap-3 mt-6 pt-2 border-t border-appBorder">
+                <button type="button" onclick="submitNewPatient('save')" id="btnSavePatient" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center hover:bg-black/20 transition">
+                    Save
+                </button>
+                <button type="button" onclick="submitNewPatient('save_book')" id="btnSaveAndBook" class="w-2/3 py-4 bg-cardWaiting text-[#0B1120] rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-cardWaiting/20">
+                    <i class="ph-bold ph-calendar-plus text-lg"></i> Save & Book
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 3. BOOK APPOINTMENT MODAL -->
+<div id="bookApptModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[90vh] overflow-y-auto" id="bookApptModalContent">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-textMain">Book Appointment</h3>
+            <button onclick="closeModal('bookApptModal')" class="w-8 h-8 bg-pillDark rounded-full flex items-center justify-center text-textMuted hover:text-white transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        
+        <form id="bookApptForm" onsubmit="submitBooking(event)" class="space-y-4">
+            <div class="relative">
+                <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PATIENT NAME OR PHONE</label>
                 <div class="relative">
-                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">PATIENT NAME OR PHONE</label>
-                    <div class="relative">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
-                        <input type="text" id="baSearch" onkeyup="searchPatientDebounce()" autocomplete="off" class="w-full pl-12 pr-5 py-4 rounded-2xl" placeholder="Search...">
-                    </div>
-                    <div id="searchResults" class="absolute w-full mt-2 bg-pillDark border border-appBorder rounded-2xl shadow-xl z-10 hidden max-h-40 overflow-y-auto">
-                    </div>
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
+                    <input type="text" id="baSearch" onkeyup="searchPatientDebounce()" autocomplete="off" class="w-full pl-12 pr-5 py-4 rounded-2xl" placeholder="Search...">
                 </div>
-
-                <input type="hidden" id="baPatientId" required>
-                <div id="selectedPatientCard" class="hidden bg-cardDone/10 border border-cardDone/30 p-4 rounded-2xl flex justify-between items-center">
-                    <div>
-                        <p class="font-bold text-cardDone text-sm" id="selPatName">Name</p>
-                        <p class="text-xs text-textMuted" id="selPatId">ID</p>
-                    </div>
-                    <button type="button" onclick="clearSelectedPatient()" class="text-textMuted hover:text-white"><i class="ph-bold ph-x-circle text-lg"></i></button>
+                <div id="searchResults" class="absolute w-full mt-2 bg-pillDark border border-appBorder rounded-2xl shadow-xl z-10 hidden max-h-40 overflow-y-auto">
                 </div>
+            </div>
 
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <div>
-                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">DATE</label>
-                        <input type="date" id="baDate" required class="w-full px-5 py-4 rounded-2xl" style="color-scheme: dark;">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">TIME</label>
-                        <select id="baTime" required class="w-full px-5 py-4 rounded-2xl appearance-none">
-                            <option value="09:00 AM">09:00 AM</option>
-                            <option value="09:30 AM">09:30 AM</option>
-                            <option value="10:00 AM">10:00 AM</option>
-                            <option value="10:30 AM">10:30 AM</option>
-                            <option value="11:00 AM">11:00 AM</option>
-                            <option value="04:00 PM">04:00 PM</option>
-                            <option value="04:30 PM">04:30 PM</option>
-                            <option value="05:00 PM">05:00 PM</option>
-                        </select>
-                    </div>
+            <input type="hidden" id="baPatientId" required>
+            <div id="selectedPatientCard" class="hidden bg-cardDone/10 border border-cardDone/30 p-4 rounded-2xl flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-cardDone text-sm" id="selPatName">Name</p>
+                    <p class="text-xs text-textMuted" id="selPatId">ID</p>
                 </div>
+                <button type="button" onclick="clearSelectedPatient()" class="text-textMuted hover:text-white"><i class="ph-bold ph-x-circle text-lg"></i></button>
+            </div>
 
-                <button type="submit" id="btnSubmitBooking" class="w-full mt-6 py-4 bg-cardDone text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90">
-                    <i class="ph-bold ph-calendar-plus"></i> Confirm Booking
-                </button>
-            </form>
-        </div>
+            <div class="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">DATE</label>
+                    <input type="date" id="baDate" required class="w-full px-5 py-4 rounded-2xl" style="color-scheme: dark;">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-textMuted ml-2 mb-1 block">TIME</label>
+                    <select id="baTime" required class="w-full px-5 py-4 rounded-2xl appearance-none">
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmitBooking" class="w-full mt-6 py-4 bg-cardDone text-[#0B1120] rounded-full font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition">
+                <i class="ph-bold ph-calendar-plus text-lg"></i> Confirm Booking
+            </button>
+        </form>
     </div>
-
 </div>
 
 <script>
@@ -304,9 +501,21 @@
 
     // Global variable to hold queue state for optimistic updates
     let currentQueueData = []; 
+    
+    // Prescription Engine State
+    let masterRemedyList = []; 
+    let masterTemplateList = []; 
+    let currentActiveConsult = null; 
+    let activeProtocol = []; 
+    let tempProtocol = []; 
+    let activeCategoryFilter = 'All';
+    
+    // Patient History State
+    let currentHistoryData = { prescriptions: [], reports: [] };
+    let activeHistoryTab = 'consults';
 
     // ==========================================
-    // UI: SPLASH, THEME, DATE SCROLLER
+    // INITIALIZATION & THEME
     // ==========================================
     window.onload = () => {
         setTimeout(() => {
@@ -343,12 +552,13 @@
     document.addEventListener("DOMContentLoaded", () => {
         renderDateSelector();
         fetchQueueData();
+        fetchRemedyMaster(); 
+        fetchTemplates();
     });
 
     function renderDateSelector() {
         const scroller = document.getElementById('dateScroller');
-        const monthYear = document.getElementById('currentMonthYear');
-        monthYear.innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        document.getElementById('currentMonthYear').innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         scroller.innerHTML = "";
         
         for(let i = -2; i <= 4; i++) {
@@ -370,9 +580,6 @@
         }
     }
 
-    // ==========================================
-    // UI: TOAST NOTIFICATIONS
-    // ==========================================
     function showToast(message, type = 'success') {
         const toast = document.getElementById('toast');
         const msg = document.getElementById('toastMsg');
@@ -393,43 +600,701 @@
             toast.classList.remove('-translate-y-20', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
         });
-
         setTimeout(() => {
             toast.classList.remove('translate-y-0', 'opacity-100');
             toast.classList.add('-translate-y-20', 'opacity-0');
         }, 3000);
     }
 
-    // ==========================================
-    // UI: MODAL CONTROLS
-    // ==========================================
     function openModal(id) {
         const modal = document.getElementById(id);
         const content = document.getElementById(id + 'Content');
         modal.classList.remove('hidden');
         setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
     }
-    
     function closeModal(id) {
         const modal = document.getElementById(id);
         const content = document.getElementById(id + 'Content');
         content.classList.add('translate-y-full');
         setTimeout(() => { modal.classList.add('hidden'); }, 300);
     }
-
     function switchModal(closeId, openId) {
         closeModal(closeId);
         setTimeout(() => { openModal(openId); }, 300);
     }
 
+    function scrollToCurrent() {
+        if (currentQueueData.length === 0) return;
+        
+        // Priority: In Consultation > Waiting > Booked
+        let targetItem = currentQueueData.find(q => q.status === 'In Consultation');
+        if (!targetItem) targetItem = currentQueueData.find(q => q.status === 'Waiting');
+        if (!targetItem) targetItem = currentQueueData.find(q => q.status === 'Booked');
+
+        if (targetItem) {
+            const el = document.getElementById(`card-token-${targetItem.tokenNo}`);
+            if (el) {
+                // Adjusting offset so the header doesn't overlap the card
+                const y = el.getBoundingClientRect().top + window.scrollY - 180; 
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
     // ==========================================
-    // API: ADD PATIENT
+    // QUEUE FETCH & RENDER
     // ==========================================
-    async function submitNewPatient(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSubmitPatient');
+    async function fetchQueueData() {
+        const container = document.getElementById('queueContainer');
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] })
+            });
+            const result = await response.json();
+            if(result.success) {
+                currentQueueData = result.data;
+                renderQueue();
+                setTimeout(scrollToCurrent, 300);
+            } else showToast(result.message, "error");
+        } catch (e) {
+            container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`;
+        }
+    }
+
+    async function handleQueueAction(tokenNo, currentStatus) {
+        const item = currentQueueData.find(q => q.tokenNo === tokenNo);
+        if (!item) return;
+
+        if (currentStatus === 'Waiting') {
+            openConsultationRoom(item);
+            advanceStatusBackground(tokenNo, 'Waiting', 'In Consultation');
+            return;
+        } else if (currentStatus === 'In Consultation') {
+            openConsultationRoom(item);
+            return;
+        }
+
+        const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
+        let currentIndex = statusFlow.indexOf(currentStatus);
+        if (currentIndex === -1 || currentIndex === 3) return;
+        
+        let newStatus = statusFlow[currentIndex + 1];
+        
+        item.status = newStatus;
+        renderQueue(tokenNo); 
+        
+        advanceStatusBackground(tokenNo, currentStatus, newStatus);
+    }
+
+    async function advanceStatusBackground(tokenNo, oldStatus, newStatus) {
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
+            });
+            const result = await response.json();
+            if(!result.success) {
+                const item = currentQueueData.find(q => q.tokenNo === tokenNo);
+                if(item) item.status = oldStatus;
+                renderQueue();
+                showToast("Failed to sync status.", "error");
+            }
+        } catch(e) { }
+    }
+
+    function renderQueue(animatedTokenNo = null) {
+        const container = document.getElementById('queueContainer');
+        container.innerHTML = "";
+
+        if(currentQueueData.length === 0) {
+            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`;
+            return;
+        }
+
+        currentQueueData.forEach((appt, index) => {
+            let bgColor, iconClass, nextAction;
+            switch(appt.status) {
+                case 'Done': bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
+                case 'In Consultation': bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Resume Consult"; break; 
+                case 'Waiting': bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
+                case 'Booked': default: bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
+            }
+
+            const isLast = index === currentQueueData.length - 1;
+            const animClass = animatedTokenNo === appt.tokenNo ? 'card-update-anim' : '';
+
+            let btnHtml = '';
+            if (appt.status === 'Waiting' || appt.status === 'In Consultation') {
+                btnHtml = `
+                    <button onclick="handleQueueAction(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">
+                        ${nextAction} <i class="ph-bold ph-arrow-right"></i>
+                    </button>`;
+            } else if (nextAction) {
+                btnHtml = `
+                    <button onclick="handleQueueAction(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">
+                        ${nextAction} <i class="ph-bold ph-check"></i>
+                    </button>`;
+            } else {
+                 btnHtml = `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`;
+            }
+
+
+            container.innerHTML += `
+                <div id="card-token-${appt.tokenNo}" class="flex h-full group ${animClass}">
+                    <div class="w-16 flex flex-col items-center shrink-0 pt-1">
+                        <span class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1 mt-2">Token</span>
+                        <span class="text-[22px] font-black text-textMain leading-none mb-2">#${appt.tokenNo}</span>
+                        ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}
+                    </div>
+                    <div class="flex-1 pl-3 pb-8">
+                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
+                            <i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}
+                        </div>
+                        <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
+                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${appt.timeSlot}</p>
+                                </div>
+                            </div>
+                            <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
+                                <div class="flex -space-x-2">
+                                    <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
+                                </div>
+                                ${btnHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // ==========================================
+    // PRESCRIPTION ENGINE LOGIC
+    // ==========================================
+    
+    async function fetchRemedyMaster() {
+        if (!GAS_WEB_APP_URL) {
+            masterRemedyList = [
+                {id: 'RM01', name: 'Triphala Churna', category: 'Herb', dose: '1 tsp', timing: 'Night, warm water'},
+                {id: 'RM02', name: 'Ashwagandha', category: 'Herb', dose: '500mg', timing: 'Morning after breakfast'},
+                {id: 'RM03', name: 'Hot Foot Bath', category: 'Therapy', dose: '15 mins', timing: 'Evening'},
+                {id: 'RM04', name: 'Intermittent Fasting (16:8)', category: 'Diet', dose: '-', timing: 'Skip breakfast'},
+                {id: 'RM05', name: 'Kapalbhati Pranayama', category: 'Yoga', dose: '10 mins', timing: 'Empty stomach morning'}
+            ];
+            return;
+        }
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getRemedyMaster' }) });
+            const data = await res.json();
+            if(data.success) { masterRemedyList = data.data; }
+        } catch (e) {}
+    }
+
+    async function fetchTemplates() {
+        if (!GAS_WEB_APP_URL) {
+            masterTemplateList = [
+                {id: 'TPL01', name: 'Acidity / GERD Protocol', remedyIds: ['RM01', 'RM04']},
+                {id: 'TPL02', name: 'Weight Loss & Detox', remedyIds: ['RM03', 'RM04', 'RM05']},
+                {id: 'TPL03', name: 'Insomnia & Stress', remedyIds: ['RM02', 'RM03', 'RM05']}
+            ];
+            return;
+        }
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getTemplates' }) });
+            const data = await res.json();
+            if(data.success) { masterTemplateList = data.data; }
+        } catch (e) {}
+    }
+
+    function openConsultationRoom(patientData) {
+        currentActiveConsult = patientData;
+        
+        document.getElementById('consultPatName').innerText = patientData.patientName;
+        document.getElementById('consultPatId').innerText = `ID: ${patientData.patientId}`;
+        document.getElementById('consultToken').innerText = `Token #${patientData.tokenNo}`;
+        
+        document.getElementById('consultComplaint').value = '';
+        document.getElementById('consultNotes').value = '';
+        activeProtocol = [];
+        renderActiveProtocol();
+
+        const room = document.getElementById('consultationRoom');
+        document.body.style.overflow = 'hidden'; 
+        room.classList.remove('slide-up-hidden');
+        room.classList.add('slide-up-active');
+    }
+
+    function closeConsultationRoom() {
+        const room = document.getElementById('consultationRoom');
+        room.classList.remove('slide-up-active');
+        room.classList.add('slide-up-hidden');
+        document.body.style.overflow = ''; 
+        currentActiveConsult = null;
+    }
+
+    function openRemedySearch() {
+        tempProtocol = JSON.parse(JSON.stringify(activeProtocol));
+        openModal('remedyModal');
+        document.getElementById('rmSearch').value = '';
+        setCategoryFilter('All');
+        filterRemedies(); 
+        document.getElementById('rmSearch').focus();
+        updateAddTreatmentButton();
+    }
+    
+    function closeRemedySearch() { closeModal('remedyModal'); }
+
+    // NEW: Open Custom Remedy Modal
+    function openCustomRemedyModal() {
+        openModal('customRemedyModal');
+        // Pre-fill the search text into the Custom Remedy Name
+        document.getElementById('crName').value = document.getElementById('rmSearch').value;
+        document.getElementById('crDose').value = '';
+        document.getElementById('crTiming').value = '';
+    }
+
+    // NEW: Add Custom Remedy to Protocol
+    function addCustomRemedy() {
+        const name = document.getElementById('crName').value.trim();
+        if(!name) {
+            showToast("Please enter a remedy name", "error");
+            return;
+        }
+
+        const customItem = {
+            id: 'CUST-' + Date.now(),
+            name: name,
+            category: document.getElementById('crCategory').value,
+            dose: document.getElementById('crDose').value,
+            timing: document.getElementById('crTiming').value
+        };
+
+        activeProtocol.push(customItem);
+        closeModal('customRemedyModal');
+        closeRemedySearch();
+        renderActiveProtocol();
+        showToast("Custom remedy added!");
+    }
+
+    // TEMPLATE MODAL LOGIC
+    function openTemplateModal() {
+        openModal('templateModal');
+        document.getElementById('tplSearch').value = '';
+        filterTemplates();
+    }
+    
+    function closeTemplateModal() { closeModal('templateModal'); }
+
+    function filterTemplates() {
+        const query = document.getElementById('tplSearch').value.toLowerCase();
+        const listDiv = document.getElementById('templateList');
+        
+        let filtered = masterTemplateList.filter(t => t.name.toLowerCase().includes(query));
+
+        if (filtered.length === 0) {
+            listDiv.innerHTML = `<div class="p-6 text-center text-sm text-textMuted">No templates found.</div>`;
+            return;
+        }
+
+        listDiv.innerHTML = filtered.map(t => {
+            return `
+                <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="applyTemplate('${t.id}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-cardConsult/10 flex items-center justify-center text-cardConsult shrink-0">
+                            <i class="ph-fill ph-magic-wand text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-textMain">${t.name}</p>
+                            <p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${t.remedyIds.length} ITEMS</p>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-white"></i>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function applyTemplate(templateId) {
+        const template = masterTemplateList.find(t => t.id === templateId);
+        if (!template) return;
+
+        let addedCount = 0;
+        template.remedyIds.forEach(rId => {
+            // Prevent duplicates
+            if (!activeProtocol.some(p => p.id === rId)) {
+                const remedy = masterRemedyList.find(r => r.id === rId);
+                if (remedy) {
+                    activeProtocol.push(JSON.parse(JSON.stringify(remedy)));
+                    addedCount++;
+                }
+            }
+        });
+
+        closeTemplateModal();
+        renderActiveProtocol();
+        
+        if (addedCount > 0) {
+            showToast(`${addedCount} items added from template!`, "success");
+        } else {
+            showToast("All items from this template are already in your protocol.", "error");
+        }
+    }
+
+    // ==========================================
+    // PATIENT HISTORY LOGIC
+    // ==========================================
+    async function openPatientHistory() {
+        if(!currentActiveConsult) return;
+        
+        const modal = document.getElementById('historyModal');
+        document.body.style.overflow = 'hidden'; 
+        modal.classList.remove('slide-up-hidden');
+        modal.classList.add('slide-up-active');
+        
+        switchHistoryTab('consults', true); 
+        
+        const contentArea = document.getElementById('historyContentArea');
+        contentArea.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading history...</p></div>`;
+
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => {
+                currentHistoryData = {
+                    prescriptions: [
+                        { date: '2026-04-10', complaint: 'Mild fever, severe acidity', protocol: [{name: 'Triphala Churna', dose: '1 tsp', timing: 'Night'}], notes: 'Patient is recovering well.' }
+                    ],
+                    reports: [
+                        { date: '2026-03-15', label: 'Complete Blood Count', url: '#' }
+                    ]
+                };
+                renderHistoryTab();
+            }, 800);
+            return;
+        }
+
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'getPatientHistory', patientId: currentActiveConsult.patientId })
+            });
+            const data = await res.json();
+            if(data.success) {
+                currentHistoryData = data.data;
+                renderHistoryTab();
+            } else {
+                contentArea.innerHTML = `<div class="text-center text-red-400 py-10">${data.message}</div>`;
+            }
+        } catch(e) {
+            contentArea.innerHTML = `<div class="text-center text-red-400 py-10">Connection failed.</div>`;
+        }
+    }
+
+    function closeHistoryModal() {
+        const modal = document.getElementById('historyModal');
+        modal.classList.remove('slide-up-active');
+        modal.classList.add('slide-up-hidden');
+    }
+
+    function switchHistoryTab(tab, skipRender = false) {
+        activeHistoryTab = tab;
+        const tabC = document.getElementById('tabConsults');
+        const tabR = document.getElementById('tabReports');
+        
+        if(tab === 'consults') {
+            tabC.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm";
+            tabR.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain";
+        } else {
+            tabR.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm";
+            tabC.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain";
+        }
+        
+        if(!skipRender) renderHistoryTab();
+    }
+
+    function renderHistoryTab() {
+        const area = document.getElementById('historyContentArea');
+        area.innerHTML = '';
+        
+        if (activeHistoryTab === 'consults') {
+            if (!currentHistoryData.prescriptions || currentHistoryData.prescriptions.length === 0) {
+                area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-folder-open text-3xl mb-2 opacity-50"></i><p>No past consultations found.</p></div>`;
+                return;
+            }
+            
+            currentHistoryData.prescriptions.forEach(p => {
+                let medsHtml = p.protocol.map(med => `
+                    <div class="flex justify-between items-center bg-[#0B1120] p-3 rounded-xl border border-appBorder mb-2">
+                        <span class="text-sm font-bold text-textMain">${med.name}</span>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold text-textMain block">${med.dose}</span>
+                            <span class="text-[10px] text-textMuted">${med.timing}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                area.innerHTML += `
+                    <div class="mb-6 relative pl-6">
+                        <div class="absolute left-0 top-1 w-3 h-3 bg-cardConsult rounded-full shadow-[0_0_10px_rgba(229,212,255,0.4)]"></div>
+                        <div class="absolute left-1.5 top-4 bottom-[-24px] w-px bg-appBorder"></div>
+                        
+                        <h4 class="text-sm font-extrabold text-cardConsult mb-1">${p.date}</h4>
+                        <div class="bg-pillDark border border-appBorder p-4 rounded-2xl shadow-sm">
+                            <p class="text-xs text-textMuted font-bold uppercase mb-1">Complaint</p>
+                            <p class="text-sm text-textMain mb-4 bg-[#0B1120]/50 p-3 rounded-xl">${p.complaint || 'None recorded'}</p>
+                            
+                            <p class="text-xs text-textMuted font-bold uppercase mb-2">Protocol Prescribed</p>
+                            ${medsHtml}
+                            
+                            ${p.notes ? `
+                            <div class="mt-3 pt-3 border-t border-appBorder border-dashed">
+                                <p class="text-xs text-textMuted font-bold uppercase mb-1">Doctor Notes</p>
+                                <p class="text-[11px] text-textMuted italic">${p.notes}</p>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+        } else {
+            if (!currentHistoryData.reports || currentHistoryData.reports.length === 0) {
+                area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-file-pdf text-3xl mb-2 opacity-50"></i><p>No lab reports uploaded.</p></div>`;
+                return;
+            }
+            
+            currentHistoryData.reports.forEach(r => {
+                area.innerHTML += `
+                    <div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-cardWaiting/50 transition cursor-pointer">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-cardWaiting/10 text-cardWaiting flex items-center justify-center shrink-0">
+                                <i class="ph-fill ph-file-pdf text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-textMain">${r.label}</p>
+                                <p class="text-[11px] font-semibold text-textMuted">${r.date}</p>
+                            </div>
+                        </div>
+                        <a href="${r.url}" target="_blank" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-cardWaiting group-hover:text-[#0B1120] transition">
+                            <i class="ph-bold ph-download-simple"></i>
+                        </a>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function setCategoryFilter(category) {
+        activeCategoryFilter = category;
+        const btns = document.querySelectorAll('.category-btn');
+        btns.forEach(btn => {
+            if (btn.innerText === category) {
+                btn.className = "category-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-textMain text-appBg shrink-0 transition";
+            } else {
+                btn.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition hover:text-white";
+            }
+        });
+        filterRemedies();
+    }
+
+    function filterRemedies() {
+        const query = document.getElementById('rmSearch').value.toLowerCase();
+        const listDiv = document.getElementById('remedyResultsList');
+        
+        let filtered = masterRemedyList.filter(r => {
+            const matchesQuery = r.name.toLowerCase().includes(query) || r.category.toLowerCase().includes(query);
+            const matchesCat = activeCategoryFilter === 'All' || r.category === activeCategoryFilter;
+            return matchesQuery && matchesCat;
+        });
+
+        if (filtered.length === 0) {
+            listDiv.innerHTML = `<div class="p-6 text-center text-sm text-textMuted">No matches found in database. <br>Use the button below to add a custom remedy.</div>`;
+            return;
+        }
+
+        listDiv.innerHTML = filtered.map(r => {
+            const isAdded = tempProtocol.some(p => p.id === r.id);
+            let catIcon = 'ph-leaf'; 
+            if(r.category === 'Diet') catIcon = 'ph-bowl-food';
+            if(r.category === 'Yoga') catIcon = 'ph-person-simple-meditate';
+            if(r.category === 'Therapy') catIcon = 'ph-drop';
+
+            return `
+                <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="toggleRemedy('${r.id}')">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-textMuted/10 flex items-center justify-center text-textMuted shrink-0">
+                            <i class="ph-fill ${catIcon} text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-textMain">${r.name}</p>
+                            <p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${r.category}</p>
+                        </div>
+                    </div>
+                    <div>
+                        ${isAdded 
+                            ? `<i class="ph-fill ph-check-circle text-2xl text-cardDone"></i>` 
+                            : `<i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-white"></i>`
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function toggleRemedy(remedyId) {
+        const index = tempProtocol.findIndex(p => p.id === remedyId);
+        if (index > -1) {
+            tempProtocol.splice(index, 1);
+        } else {
+            const remedy = masterRemedyList.find(r => r.id === remedyId);
+            if (remedy) {
+                tempProtocol.push(JSON.parse(JSON.stringify(remedy)));
+            }
+        }
+        filterRemedies();
+        updateAddTreatmentButton();
+    }
+
+    function updateAddTreatmentButton() {
+        const btnContainer = document.getElementById('addTreatmentBtnContainer');
+        if (tempProtocol.length > 0) {
+            btnContainer.classList.remove('hidden');
+            document.getElementById('addTreatmentBtnSpan').innerText = `Add ${tempProtocol.length} Item${tempProtocol.length > 1 ? 's' : ''} to Treatment`;
+        } else {
+            btnContainer.classList.add('hidden');
+        }
+    }
+
+    function commitTreatment() {
+        activeProtocol = JSON.parse(JSON.stringify(tempProtocol));
+        closeRemedySearch();
+        renderActiveProtocol();
+    }
+
+    function renderActiveProtocol() {
+        const listDiv = document.getElementById('protocolList');
+        const emptyState = document.getElementById('emptyProtocolState');
+
+        if (activeProtocol.length === 0) {
+            listDiv.innerHTML = '';
+            listDiv.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        
+        let html = '';
+        activeProtocol.forEach((item, index) => {
+            html += `
+                <div class="bg-pillDark border border-appBorder rounded-[20px] p-4 relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 ${item.category === 'Diet' ? 'bg-cardWaiting' : item.category === 'Yoga' ? 'bg-cardConsult' : 'bg-cardDone'}"></div>
+                    
+                    <div class="flex justify-between items-start pl-2">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm text-textMain mb-1">${item.name}</h4>
+                            
+                            <div class="flex flex-col gap-2 mt-2 mr-2">
+                                <div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5">
+                                    <i class="ph-fill ph-pill text-textMuted mr-2"></i>
+                                    <input type="text" value="${item.dose}" onchange="updateProtocolItem(${index}, 'dose', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Dose (e.g. 1 tsp)">
+                                </div>
+                                <div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5">
+                                    <i class="ph-fill ph-clock text-textMuted mr-2"></i>
+                                    <input type="text" value="${item.timing}" onchange="updateProtocolItem(${index}, 'timing', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Timing">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="removeProtocolItem(${index})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500 hover:text-white transition shrink-0">
+                            <i class="ph-bold ph-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        listDiv.innerHTML = html;
+        listDiv.appendChild(emptyState); 
+    }
+
+    function updateProtocolItem(index, field, value) { activeProtocol[index][field] = value; }
+    function removeProtocolItem(index) { activeProtocol.splice(index, 1); renderActiveProtocol(); }
+
+    async function finalizeConsultation() {
+        if (activeProtocol.length === 0) {
+            showToast("Please add at least one item to the protocol.", "error");
+            return;
+        }
+
+        const btn = document.getElementById('btnFinalize');
         btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
         btn.disabled = true;
+
+        const payload = {
+            action: 'savePrescription',
+            patientId: currentActiveConsult.patientId,
+            tokenNo: currentActiveConsult.tokenNo,
+            date: selectedDate.toISOString().split('T')[0],
+            complaint: document.getElementById('consultComplaint').value,
+            notes: document.getElementById('consultNotes').value,
+            protocol: activeProtocol
+        };
+
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => {
+                showToast("Prescription Saved & Sent!", "success");
+                closeConsultationRoom();
+                const item = currentQueueData.find(q => q.tokenNo === currentActiveConsult.tokenNo);
+                if(item) item.status = "Done";
+                renderQueue();
+                btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription`;
+                btn.disabled = false;
+            }, 1000);
+            return;
+        }
+
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const data = await res.json();
+            
+            if(data.success) {
+                showToast("Prescription Saved & Sent!", "success");
+                closeConsultationRoom();
+                fetchQueueData(); 
+            } else { showToast(data.message, "error"); }
+        } catch(err) { showToast("Connection failed.", "error"); } 
+        finally {
+            btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> Send Prescription`;
+            btn.disabled = false;
+        }
+    }
+
+    // ==========================================
+    // EXTRA ACTION APIS (NEW PATIENT & BOOK)
+    // ==========================================
+    async function submitNewPatient(actionType) {
+        // Validate form manually before processing
+        const form = document.getElementById('newPatientForm');
+        if(!form.checkValidity()) {
+            form.reportValidity(); // Shows native browser tooltips
+            return;
+        }
+
+        const btnSave = document.getElementById('btnSavePatient');
+        const btnSaveBook = document.getElementById('btnSaveAndBook');
+        const originalSaveText = btnSave.innerHTML;
+        const originalSaveBookText = btnSaveBook.innerHTML;
+
+        if(actionType === 'save') btnSave.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
+        else btnSaveBook.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
+        
+        btnSave.disabled = true;
+        btnSaveBook.disabled = true;
 
         const payload = {
             action: 'addPatient',
@@ -440,24 +1305,51 @@
             gender: document.getElementById('npGender').value,
         };
 
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => {
+                showToast("Patient Added Successfully!", "success");
+                closeModal('newPatientModal');
+                
+                if(actionType === 'save_book') {
+                    setTimeout(() => {
+                        openModal('bookApptModal');
+                        selectPatient("NCC-NEW", payload.name);
+                    }, 400);
+                }
+                form.reset();
+                btnSave.innerHTML = originalSaveText;
+                btnSaveBook.innerHTML = originalSaveBookText;
+                btnSave.disabled = false;
+                btnSaveBook.disabled = false;
+            }, 1000);
+            return;
+        }
+
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
             if(data.success) {
                 showToast("Patient Added Successfully!", "success");
                 closeModal('newPatientModal');
-                document.getElementById('newPatientForm').reset();
+                
+                if (actionType === 'save_book' && data.data && data.data.patientId) {
+                    // Open booking modal and pre-fill the newly created patient
+                    setTimeout(() => {
+                        openModal('bookApptModal');
+                        selectPatient(data.data.patientId, payload.name);
+                    }, 400);
+                }
+                form.reset();
             } else { showToast(data.message, "error"); }
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally {
-            btn.innerHTML = `<i class="ph-bold ph-check"></i> Save Patient Record`;
-            btn.disabled = false;
+            btnSave.innerHTML = originalSaveText;
+            btnSaveBook.innerHTML = originalSaveBookText;
+            btnSave.disabled = false;
+            btnSaveBook.disabled = false;
         }
     }
 
-    // ==========================================
-    // API: SEARCH & BOOK APPOINTMENT
-    // ==========================================
     let searchTimeout;
     function searchPatientDebounce() {
         clearTimeout(searchTimeout);
@@ -469,6 +1361,17 @@
         const resBox = document.getElementById('searchResults');
         
         if (query.length < 2) { resBox.classList.add('hidden'); return; }
+
+        if(!GAS_WEB_APP_URL) {
+            resBox.innerHTML = `
+                <div onclick="selectPatient('NCC-999', 'Mock Patient Name')" class="p-4 border-b border-appBorder hover:bg-black/20 cursor-pointer">
+                    <p class="font-bold text-sm text-textMain">Mock Patient Name</p>
+                    <p class="text-xs text-textMuted">NCC-999 • ${query}</p>
+                </div>
+            `;
+            resBox.classList.remove('hidden');
+            return;
+        }
 
         try {
             resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted"><i class="ph ph-spinner-gap animate-spin"></i> Searching...</div>`;
@@ -510,6 +1413,7 @@
         if(!pId) { showToast("Please search and select a patient first.", "error"); return; }
 
         const btn = document.getElementById('btnSubmitBooking');
+        const originalText = btn.innerHTML;
         btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Booking...`;
         btn.disabled = true;
 
@@ -520,6 +1424,20 @@
             timeSlot: document.getElementById('baTime').value
         };
 
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => {
+                showToast("Appointment Booked!", "success");
+                closeModal('bookApptModal');
+                clearSelectedPatient();
+                
+                document.getElementById('queueContainer').innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Refreshing queue...</p></div>`;
+                fetchQueueData(); 
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+            return;
+        }
+
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
@@ -528,143 +1446,16 @@
                 closeModal('bookApptModal');
                 clearSelectedPatient();
                 
-                // Show loading state and fetch new data
                 document.getElementById('queueContainer').innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Refreshing queue...</p></div>`;
                 fetchQueueData(); 
             } else { showToast(data.message, "error"); }
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally {
-            btn.innerHTML = `<i class="ph-bold ph-calendar-plus"></i> Confirm Booking`;
+            btn.innerHTML = originalText;
             btn.disabled = false;
         }
     }
 
-    // ==========================================
-    // API: GET QUEUE & OPTIMISTIC UI UPDATES
-    // ==========================================
-    async function fetchQueueData() {
-        const container = document.getElementById('queueContainer');
-        
-        try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] })
-            });
-            const result = await response.json();
-            if(result.success) {
-                currentQueueData = result.data; // Store in local state
-                renderQueue(); // Draw UI
-            } else showToast(result.message, "error");
-        } catch (e) {
-            showToast("Failed to fetch queue.", "error");
-            container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`;
-        }
-    }
-
-    // 🔥 OPTIMISTIC UI UPDATE FUNCTION
-    async function advanceStatus(tokenNo, currentStatus) {
-        const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
-        let currentIndex = statusFlow.indexOf(currentStatus);
-        if (currentIndex === -1 || currentIndex === 3) return;
-        
-        let newStatus = statusFlow[currentIndex + 1];
-
-        // 1. Instantly update Local State
-        const itemIndex = currentQueueData.findIndex(q => q.tokenNo === tokenNo);
-        if (itemIndex > -1) {
-            currentQueueData[itemIndex].status = newStatus;
-        }
-
-        // 2. Instantly re-render UI (feels lightning fast, no glitchy loading spinners!)
-        renderQueue(tokenNo); 
-
-        // 3. Send silent background request to Google Sheets
-        try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
-            });
-            const result = await response.json();
-            
-            if(!result.success) {
-                // If API fails, revert the UI and show error
-                if (itemIndex > -1) currentQueueData[itemIndex].status = currentStatus;
-                renderQueue();
-                showToast("Failed to sync with server. Reverted.", "error");
-            }
-        } catch(e) { 
-            // Network failure handling
-            if (itemIndex > -1) currentQueueData[itemIndex].status = currentStatus;
-            renderQueue();
-            showToast("Network error. Could not update.", "error"); 
-        }
-    }
-
-    // ==========================================
-    // RENDER LOGIC (Folder Style with Serial Numbers)
-    // ==========================================
-    function renderQueue(animatedTokenNo = null) {
-        const container = document.getElementById('queueContainer');
-        container.innerHTML = "";
-
-        if(currentQueueData.length === 0) {
-            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`;
-            return;
-        }
-
-        currentQueueData.forEach((appt, index) => {
-            let bgColor, iconClass, nextAction;
-            switch(appt.status) {
-                case 'Done': bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
-                case 'In Consultation': bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Mark Done"; break;
-                case 'Waiting': bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
-                case 'Booked': default: bgColor = 'bg-cardBooked'; iconClass = 'ph-calendar-check'; nextAction = "Mark Arrived"; break;
-            }
-
-            const isLast = index === currentQueueData.length - 1;
-            const animClass = animatedTokenNo === appt.tokenNo ? 'card-update-anim' : '';
-
-            container.innerHTML += `
-                <div class="flex h-full group ${animClass}">
-                    
-                    <!-- Left Column: Token Number (Serial Number) -->
-                    <div class="w-16 flex flex-col items-center shrink-0 pt-1">
-                        <span class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1 mt-2">Token</span>
-                        <span class="text-[22px] font-black text-textMain leading-none mb-2">#${appt.tokenNo}</span>
-                        ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}
-                    </div>
-                    
-                    <!-- Right Column: The File Folder Card -->
-                    <div class="flex-1 pl-3 pb-8">
-                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
-                            <i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}
-                        </div>
-                        
-                        <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3>
-                                    <!-- Time has been cleanly moved to the card details -->
-                                    <p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${appt.timeSlot}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
-                                <div class="flex -space-x-2">
-                                    <div class="w-7 h-7 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center"><i class="ph-fill ph-file-text text-[10px] text-white"></i></div>
-                                </div>
-                                ${nextAction ? `
-                                <button onclick="advanceStatus(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">
-                                    ${nextAction} <i class="ph-bold ph-arrow-right"></i>
-                                </button>
-                                ` : `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    }
 </script>
 </body>
 </html>
