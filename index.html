@@ -121,6 +121,12 @@
         
         textarea::-webkit-scrollbar { width: 6px; }
         textarea::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        
+        /* Swipe to delete styles */
+        .swipeable-card {
+            touch-action: pan-y;
+            will-change: transform;
+        }
     </style>
 </head>
 <body>
@@ -192,13 +198,20 @@
 </div>
 
 <!-- MAIN DASHBOARD CONTAINER -->
-<div class="app-container md:border-x md:border-appBorder md:shadow-2xl" id="mainDashboard">
+<div class="app-container md:border-x md:border-appBorder md:shadow-2xl overflow-x-hidden" id="mainDashboard">
     
     <!-- HEADER -->
     <div class="px-6 pt-10 pb-4 flex justify-between items-center bg-appHeader rounded-b-[40px] z-20 relative shadow-lg transition-colors duration-400">
         <div>
             <i onclick="openSidebar()" class="ph-bold ph-list text-2xl mb-4 block text-textMain cursor-pointer hover:opacity-80 transition-opacity"></i>
-            <h1 class="text-2xl font-bold text-textMain tracking-tight" id="headerTitle">Today's Queue</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-bold text-textMain tracking-tight" id="headerTitle">Today's Queue</h1>
+                <div id="followUpPill" onclick="openFollowUpModal()" class="hidden cursor-pointer relative bg-pillDark border border-appBorder px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1 hover:bg-black/10 transition-colors">
+                    <i id="followUpIconSmall" class="ph-bold ph-check-circle text-textMuted text-sm"></i>
+                    <span id="followUpCountTextSmall" class="text-textMuted">0 follow ups today</span>
+                    <span id="followUpRedDot" class="hidden absolute top-0 right-0 -mt-0.5 -mr-0.5 w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.6)]"></span>
+                </div>
+            </div>
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
         </div>
         <div class="relative self-start mt-4 flex gap-2">
@@ -210,10 +223,13 @@
 
     <!-- ==================== VIEW 1: HOME (QUEUE) ==================== -->
     <div id="view-home" class="view-section active">
-        <div class="pt-8 pb-6 bg-appBg sticky top-0 z-10 transition-colors duration-400">
-            <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer">
-                <h2 class="text-xl font-medium text-textMain" id="currentMonthYear">May 2026</h2>
-                <i class="ph-bold ph-caret-down text-textMuted"></i>
+
+        <div class="pt-8 pb-4 bg-appBg sticky top-0 z-10 transition-colors duration-400">
+            <!-- Fixed Date Picker Implementation -->
+            <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer relative w-fit mx-auto group" onclick="openDatePicker()">
+                <h2 class="text-xl font-medium text-textMain group-hover:text-accentWait transition-colors" id="currentMonthYear">May 2026</h2>
+                <i class="ph-bold ph-caret-down text-textMuted group-hover:text-accentWait transition-colors"></i>
+                <input type="date" id="hiddenDatePicker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="changeDateFromPicker(this.value)" style="color-scheme: dark;">
             </div>
             <div class="flex space-x-3 overflow-x-auto no-scrollbar px-6 items-end h-[110px]" id="dateScroller"></div>
         </div>
@@ -231,7 +247,7 @@
         </div>
     </div>
 
-    <!-- ==================== VIEW 2: PATIENTS (With Direct Consult) ==================== -->
+    <!-- ==================== VIEW 2: PATIENTS (With Swipe Actions) ==================== -->
     <div id="view-patients" class="view-section pt-8 px-4">
         <div class="relative mb-6">
             <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-xl"></i>
@@ -241,23 +257,26 @@
             <h3 class="font-bold text-textMuted text-xs uppercase tracking-wider">Patient Directory</h3>
             <span class="text-xs font-bold text-accentWait bg-accentWait/10 px-2 py-1 rounded-full" id="dirCount">0 Total</span>
         </div>
-        <div id="patientDirectoryList" class="space-y-3 pb-20">
+        
+        <p class="text-[10px] text-textMuted/70 text-center mb-3"><i class="ph-bold ph-arrows-left-right"></i> Swipe cards left for more options</p>
+        
+        <div id="patientDirectoryList" class="space-y-3 pb-20 overflow-hidden">
             <div class="text-center text-textMuted py-10"><i class="ph ph-spinner-gap animate-spin text-2xl mb-2 inline-block"></i><p class="text-sm">Loading directory...</p></div>
         </div>
     </div>
 
-    <!-- ==================== VIEW 3: REPORTS ==================== -->
+    <!-- ==================== VIEW 3: REPORTS (Live Stats) ==================== -->
     <div id="view-reports" class="view-section pt-8 px-6">
         <div class="bg-pillDark border border-appBorder rounded-3xl p-6 text-center mb-6">
             <div class="w-16 h-16 bg-accentConsult/10 text-accentConsult rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="ph-fill ph-chart-line-up text-3xl"></i>
             </div>
             <h2 class="text-xl font-bold text-textMain mb-1">Clinic Analytics</h2>
-            <p class="text-sm text-textMuted">Analytics and master reports will appear here.</p>
+            <p class="text-sm text-textMuted">Analytics and master reports based on today's queue.</p>
         </div>
         <div class="grid grid-cols-2 gap-4">
             <div class="bg-pillDark border border-appBorder rounded-2xl p-4 text-center">
-                <h3 class="text-3xl font-black text-textMain mb-1">12</h3>
+                <h3 class="text-3xl font-black text-textMain mb-1" id="statTotalConsults">0</h3>
                 <p class="text-[10px] font-bold text-textMuted uppercase">Consults Today</p>
             </div>
             <div class="bg-pillDark border border-appBorder rounded-2xl p-4 text-center">
@@ -267,7 +286,7 @@
         </div>
     </div>
 
-    <!-- ==================== VIEW 4: SETTINGS (Editable Wait Time) ==================== -->
+    <!-- ==================== VIEW 4: SETTINGS ==================== -->
     <div id="view-settings" class="view-section pt-8 px-6">
         <div class="flex items-center gap-4 bg-pillDark border border-appBorder rounded-3xl p-4 mb-6">
             <div class="w-16 h-16 bg-cardDone/20 text-accentDone rounded-full flex items-center justify-center shrink-0">
@@ -292,7 +311,7 @@
         </div>
 
         <div class="space-y-3">
-            <button onclick="fetchRemedyMaster(); fetchTemplates(); showToast('Cache Synced!');" class="w-full bg-pillDark border border-appBorder p-4 rounded-2xl flex justify-between items-center hover:bg-black/10 transition">
+            <button onclick="forceSyncDatabase()" class="w-full bg-pillDark border border-appBorder p-4 rounded-2xl flex justify-between items-center hover:bg-black/10 transition">
                 <div class="flex items-center gap-3"><i class="ph-bold ph-database text-textMuted text-xl"></i> <span class="font-bold text-textMain text-sm">Sync Database Cache</span></div>
                 <i class="ph-bold ph-caret-right text-textMuted"></i>
             </button>
@@ -376,7 +395,7 @@
             <textarea id="consultNotes" oninput="saveDraft()" rows="2" class="w-full rounded-[20px] p-4 text-sm font-medium resize-none shadow-sm placeholder:text-textMuted/50" placeholder="Notes for next visit (Not visible to patient)"></textarea>
         </div>
         
-        <!-- Follow Up Dropdown (Godmode feature) -->
+        <!-- Follow Up Dropdown -->
         <div class="mt-6 p-4 bg-pillDark border border-appBorder rounded-[20px]">
              <label class="text-[11px] font-bold text-textMuted tracking-wider mb-2 block uppercase flex items-center gap-1"><i class="ph-bold ph-calendar"></i> Schedule Follow-up</label>
              <select id="consultFollowUp" class="w-full px-4 py-3 rounded-xl appearance-none text-sm font-bold">
@@ -398,6 +417,42 @@
 </div>
 
 <!-- ALL MODALS -->
+
+<!-- Follow Up Alert Modal (NEW) -->
+<div id="followUpModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[80vh] overflow-y-auto" id="followUpModalContent">
+        <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-6 shrink-0"></div>
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-cardBooked/20 text-accentBooked rounded-full flex items-center justify-center"><i class="ph-fill ph-bell-ringing text-2xl"></i></div>
+                <h3 class="text-xl font-bold text-textMain">Today's Follow-ups</h3>
+            </div>
+            <button onclick="closeModal('followUpModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        
+        <div id="followUpList" class="space-y-3 pb-6">
+            <div class="text-center text-textMuted py-8">
+                <i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i>
+                <p class="text-sm">No follow-ups due today.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Note Modal (NEW) -->
+<div id="patientNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
+    <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="patientNoteModalContent">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-textMain">Private Note</h3>
+            <button onclick="closeModal('patientNoteModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
+        </div>
+        <p class="text-xs text-textMuted mb-4">Adding private note for <span id="pnPatName" class="font-bold text-textMain">Patient</span></p>
+        <textarea id="pnNoteText" rows="4" class="w-full rounded-2xl p-4 text-sm font-medium resize-none shadow-sm placeholder:text-textMuted/50 mb-4" placeholder="Type background info, alerts, etc..."></textarea>
+        <button onclick="savePatientNote()" id="btnSavePatNote" class="w-full py-4 bg-accentConsult text-[#0B1120] rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition">
+            Save Note
+        </button>
+    </div>
+</div>
 
 <!-- WhatsApp / Calendar Success Modal (For Booking) -->
 <div id="bookingSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
@@ -657,7 +712,7 @@
                     </div>
                 </div>
                 
-                <!-- Editable fields (Godmode Feature) -->
+                <!-- Editable fields -->
                 <div id="editPatientInfoDiv" class="hidden mt-3 pt-3 border-t border-cardDone/20 space-y-3">
                      <p class="text-[10px] font-bold text-accentWait uppercase">Update Details</p>
                      <input type="tel" id="editPatPhone" class="w-full px-3 py-2 rounded-lg text-sm bg-appBg/50 border-appBorder" placeholder="Phone Number">
@@ -711,7 +766,8 @@
     let activeProtocol = []; 
     let tempProtocol = []; 
     let activeCategoryFilter = 'All';
-    let editPrescriptionModeId = null; // New state for editing Rx
+    let editPrescriptionModeId = null; 
+    let followUpsViewed = false; // Godmode: Tracks if red dot should be cleared
     
     let currentHistoryData = { prescriptions: [], reports: [] };
     let activeHistoryTab = 'consults';
@@ -726,8 +782,17 @@
             document.getElementById('startBtn').classList.remove('opacity-0', 'translate-y-4');
         }, 100);
         
-        fetchSettings(); // Load wait time
+        fetchSettings(); 
     };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderDateSelector();
+        fetchQueueData();
+        fetchRemedyMaster(); 
+        fetchTemplates();
+        fetchAllPatients(); 
+        fetchFollowUps(); // Fetches immediately on load now
+    });
 
     function startApp() {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -752,14 +817,6 @@
             dateInput.style.colorScheme = 'light';
         }
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        renderDateSelector();
-        fetchQueueData();
-        fetchRemedyMaster(); 
-        fetchTemplates();
-        fetchAllPatients(); 
-    });
 
     // ==========================================
     // SETTINGS (Wait Time)
@@ -831,6 +888,12 @@
         activeIcon.className = `ph-fill ph-${iconName(viewName)} text-[26px]`;
         activeDot.className = "w-1 h-1 bg-textMain rounded-full mt-1";
 
+        // Hide follow-up pill if not on home screen
+        const followUpPill = document.getElementById('followUpPill');
+        if(followUpPill) {
+            followUpPill.style.display = viewName === 'home' ? 'flex' : 'none';
+        }
+
         if(viewName === 'home') scrollToCurrent();
     }
 
@@ -842,20 +905,32 @@
     }
 
     // ==========================================
-    // PATIENTS DIRECTORY (With Quick Rx)
+    // PATIENTS DIRECTORY (Scalable Cache & Swipe)
     // ==========================================
     async function fetchAllPatients() {
-        if(!GAS_WEB_APP_URL) {
-            allPatientsDirectory = [{patientId: 'NCC-001', name: 'Rahul Sharma', phone: '9876543210'}, {patientId: 'NCC-042', name: 'Anita Desai', phone: '9988776655'}];
+        // Godmode: Load from cache first for zero delay
+        const cached = localStorage.getItem('clinic_patients_cache');
+        if (cached) {
+            allPatientsDirectory = JSON.parse(cached);
             renderDirectory();
+        }
+
+        if(!GAS_WEB_APP_URL) {
+            if(!cached) {
+                allPatientsDirectory = [{patientId: 'NCC-001', name: 'Rahul Sharma', phone: '9876543210'}, {patientId: 'NCC-042', name: 'Anita Desai', phone: '9988776655'}];
+                renderDirectory();
+            }
             return;
         }
+
         try {
+            // Fetch silently in background
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'searchPatient', query: '' }) });
             const data = await res.json();
             if(data.success) {
                 allPatientsDirectory = data.data;
-                renderDirectory();
+                localStorage.setItem('clinic_patients_cache', JSON.stringify(data.data));
+                renderDirectory(); // Update silently
             }
         } catch(e) {}
     }
@@ -871,21 +946,71 @@
         }
 
         container.innerHTML = list.map(p => `
-            <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition shadow-sm group">
-                <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="openPatientHistoryFromDirectory('${p.patientId}', '${p.name}')">
-                    <div class="w-10 h-10 rounded-full bg-textMuted/10 flex items-center justify-center text-textMuted shrink-0 font-bold">
-                        ${p.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm text-textMain group-hover:text-accentWait transition-colors">${p.name}</p>
-                        <p class="text-[10px] font-semibold text-textMuted">${p.patientId} • ${p.phone}</p>
-                    </div>
+            <div class="relative overflow-hidden rounded-2xl mb-3 border border-appBorder bg-pillDark">
+                <!-- Background Action Buttons -->
+                <div class="absolute inset-y-0 right-0 flex">
+                    <button onclick="openPatientNoteModal('${p.patientId}', '${p.name}')" class="w-16 bg-accentConsult text-[#0B1120] flex flex-col justify-center items-center font-bold text-[10px] hover:opacity-90">
+                        <i class="ph-bold ph-notebook text-xl mb-1"></i> Note
+                    </button>
+                    <button onclick="deletePatient('${p.patientId}')" class="w-16 bg-red-500 text-white flex flex-col justify-center items-center font-bold text-[10px] hover:opacity-90">
+                        <i class="ph-bold ph-trash text-xl mb-1"></i> Del
+                    </button>
                 </div>
-                <button onclick="openQuickRx('${p.patientId}', '${p.name}')" class="bg-accentWait/10 hover:bg-accentWait text-accentWait hover:text-[#0B1120] rounded-xl px-3 py-2 text-xs font-bold flex items-center gap-1 transition-colors border border-accentWait/20 shadow-sm shrink-0">
-                    <i class="ph-fill ph-lightning"></i> Direct Consult
-                </button>
+                <!-- Foreground Swipable Card -->
+                <div class="relative bg-pillDark p-4 flex justify-between items-center shadow-sm z-10 swipeable-card transform transition-transform duration-200"
+                     ontouchstart="handleSwipeStart(event, this)" ontouchmove="handleSwipeMove(event, this)" ontouchend="handleSwipeEnd(event, this)">
+                    <div class="flex items-center gap-3 cursor-pointer flex-1" onclick="openPatientHistoryFromDirectory('${p.patientId}', '${p.name}')">
+                        <div class="w-10 h-10 rounded-full bg-textMuted/10 flex items-center justify-center text-textMuted shrink-0 font-bold">
+                            ${p.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-textMain group-hover:text-accentWait transition-colors">${p.name}</p>
+                            <p class="text-[10px] font-semibold text-textMuted">${p.patientId} • ${p.phone}</p>
+                        </div>
+                    </div>
+                    <button onclick="openQuickRx('${p.patientId}', '${p.name}')" class="bg-accentWait/10 hover:bg-accentWait text-accentWait hover:text-[#0B1120] rounded-xl px-3 py-2 text-xs font-bold flex items-center gap-1 transition-colors border border-accentWait/20 shadow-sm shrink-0">
+                        <i class="ph-fill ph-lightning"></i> Direct Consult
+                    </button>
+                </div>
             </div>
         `).join('');
+    }
+
+    // Godmode: Swipe Logic for Directory
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    function handleSwipeStart(e, el) {
+        startX = e.touches ? e.touches[0].clientX : e.clientX;
+        isDragging = true;
+        el.style.transition = 'none';
+    }
+    
+    function handleSwipeMove(e, el) {
+        if(!isDragging) return;
+        currentX = e.touches ? e.touches[0].clientX : e.clientX;
+        let diff = currentX - startX;
+        if(diff < 0 && diff >= -140) { // dragging left
+            el.style.transform = `translateX(${diff}px)`;
+        }
+    }
+    
+    function handleSwipeEnd(e, el) {
+        if(!isDragging) return;
+        isDragging = false;
+        el.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        let diff = currentX - startX;
+        
+        if(diff < -50) {
+            el.style.transform = `translateX(-128px)`; // 2 buttons width
+            // Close other swiped cards
+            document.querySelectorAll('.swipeable-card').forEach(card => {
+                if(card !== el) { card.style.transform = 'translateX(0)'; }
+            });
+        } else {
+            el.style.transform = `translateX(0)`;
+        }
     }
 
     function filterDirectory() {
@@ -899,23 +1024,70 @@
         openPatientHistory();
     }
 
-    // GODMODE: DIRECT CONSULT
     function openQuickRx(pId, pName) {
         const mockAppt = { patientId: pId, patientName: pName, tokenNo: 'Direct' };
         openConsultationRoom(mockAppt);
     }
+    
+    // Patient Swipe Actions API Handlers
+    function openPatientNoteModal(pId, pName) {
+        document.getElementById('pnPatName').innerText = pName;
+        document.getElementById('pnNoteText').dataset.pid = pId;
+        document.getElementById('pnNoteText').value = ""; // clear old
+        openModal('patientNoteModal');
+        // Reset card swipe
+        document.querySelectorAll('.swipeable-card').forEach(card => card.style.transform = 'translateX(0)');
+    }
+    
+    async function savePatientNote() {
+        const pId = document.getElementById('pnNoteText').dataset.pid;
+        const note = document.getElementById('pnNoteText').value;
+        const btn = document.getElementById('btnSavePatNote');
+        btn.innerText = "Saving...";
+        
+        if(!GAS_WEB_APP_URL) {
+            setTimeout(() => { showToast("Private Note saved!"); closeModal('patientNoteModal'); btn.innerText = "Save Note"; }, 500);
+            return;
+        }
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'addPatientNote', patientId: pId, note: note }) });
+            showToast("Private Note saved!");
+            closeModal('patientNoteModal');
+        } catch(e) { showToast("Error saving note", "error"); }
+        finally { btn.innerText = "Save Note"; }
+    }
+    
+    async function deletePatient(pId) {
+        if(!confirm("Are you sure you want to delete this patient record?")) return;
+        
+        // Optimistic UI update
+        allPatientsDirectory = allPatientsDirectory.filter(p => p.patientId !== pId);
+        localStorage.setItem('clinic_patients_cache', JSON.stringify(allPatientsDirectory));
+        renderDirectory();
+        
+        if(!GAS_WEB_APP_URL) { showToast("Patient Deleted!"); return; }
+        try {
+            fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'deletePatient', patientId: pId }) });
+            showToast("Patient Deleted!");
+        } catch(e) {}
+    }
+    
+    function forceSyncDatabase() {
+        localStorage.removeItem('clinic_patients_cache');
+        fetchAllPatients();
+        fetchRemedyMaster(); 
+        fetchTemplates(); 
+        showToast('Cache Cleared & Synced!');
+    }
 
     // ==========================================
-    // UTILS & QUEUE
+    // UTILS & QUEUE (With Analytics Update)
     // ==========================================
     function formatTimeDisplay(timeVal) {
         if (!timeVal) return "";
         let str = String(timeVal);
         if (str.includes("T") && str.includes("Z")) {
-            try {
-                let d = new Date(str);
-                return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            } catch(e) {}
+            try { return new Date(str).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); } catch(e) {}
         }
         return str;
     }
@@ -923,6 +1095,11 @@
     function renderDateSelector() {
         const scroller = document.getElementById('dateScroller');
         document.getElementById('currentMonthYear').innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        
+        // Sync hidden date picker value
+        const dateInput = document.getElementById('hiddenDatePicker');
+        if(dateInput) dateInput.value = selectedDate.toISOString().split('T')[0];
+
         scroller.innerHTML = "";
         
         for(let i = -2; i <= 4; i++) {
@@ -948,6 +1125,18 @@
             }
             scroller.appendChild(dateBtn);
         }
+    }
+
+    function openDatePicker() {
+        const picker = document.getElementById('hiddenDatePicker');
+        try {
+            if (typeof picker.showPicker === 'function') {
+                picker.showPicker();
+            } else {
+                picker.focus();
+                picker.click();
+            }
+        } catch(e) {}
     }
 
     function showToast(message, type = 'success') {
@@ -990,6 +1179,13 @@
         setTimeout(() => { openModal(openId); }, 300);
     }
 
+    function changeDateFromPicker(val) {
+        if(!val) return;
+        selectedDate = new Date(val);
+        renderDateSelector();
+        fetchQueueData();
+    }
+
     function scrollToCurrent() {
         if (currentQueueData.length === 0) return;
         let targetItem = currentQueueData.find(q => q.status === 'In Consultation');
@@ -1019,6 +1215,10 @@
             if(result.success) {
                 currentQueueData = result.data;
                 renderQueue();
+                
+                // GODMODE: Update Live Analytics (Total Consults Today)
+                document.getElementById('statTotalConsults').innerText = currentQueueData.length;
+                
                 setTimeout(scrollToCurrent, 300);
             } else showToast(result.message, "error");
         } catch (e) {
@@ -1129,55 +1329,87 @@
     }
 
     // ==========================================
-    // WHATSAPP & CALENDAR LOGIC
+    // FOLLOW-UP SYSTEM (Godmode)
     // ==========================================
-    function generateCalendarLink(dateStr, timeStr) {
+    async function fetchFollowUps() {
+        if(!GAS_WEB_APP_URL) {
+            renderFollowUps([{name: 'Rahul Sharma', date: '2026-05-15', id: 'NCC-001'}]);
+            return;
+        }
         try {
-            let [time, modifier] = timeStr.split(' ');
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours, 10);
-            if (modifier === 'PM' && hours < 12) hours += 12;
-            if (modifier === 'AM' && hours === 12) hours = 0;
-
-            let startDt = new Date(dateStr);
-            startDt.setHours(hours, parseInt(minutes), 0);
-            let endDt = new Date(startDt.getTime() + 30*60000);
-
-            const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
-            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`;
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getTodayFollowUps' }) });
+            const data = await res.json();
+            if(data.success) {
+                renderFollowUps(data.data);
+            } else {
+                renderFollowUps([]);
+            }
         } catch(e) {
-            return "https://calendar.google.com/";
+            console.error("Followups error", e);
         }
     }
-
-    function showBookingSuccess(patientName, date, time, tokenNo, patientPhone) {
-        const calLink = generateCalendarLink(date, time);
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        const prettyDate = new Date(date).toLocaleDateString('en-US', options);
-
-        const msg = `Namaste ${patientName} ji! 🌿\n\nYour appointment is confirmed.\n(आपकी अपॉइंटमेंट पक्की हो गई है।)\n\n📅 Date (तारीख): ${prettyDate}\n🕙 Time (समय): ${time}\n🎟️ Token (टोकन): #${tokenNo}\n\nTap to add reminder to your phone:\n(रिमाइंडर सेट करने के लिए क्लिक करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
-
-        document.getElementById('waMessageText').value = msg;
-        document.getElementById('waMessageText').dataset.phone = patientPhone || '';
+    
+    function renderFollowUps(list) {
+        const pill = document.getElementById('followUpPill');
+        const textSmall = document.getElementById('followUpCountTextSmall');
+        const iconSmall = document.getElementById('followUpIconSmall');
+        const modalList = document.getElementById('followUpList');
+        const redDot = document.getElementById('followUpRedDot');
         
-        switchModal('bookApptModal', 'bookingSuccessModal');
+        // Ensure pill logic respects the current view display state
+        pill.style.display = document.getElementById('view-home').classList.contains('active') ? 'flex' : 'none';
+        
+        if(!list || list.length === 0) {
+            pill.className = "cursor-pointer relative bg-pillDark border border-appBorder px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1 hover:bg-black/10 transition-colors";
+            iconSmall.className = "ph-bold ph-check-circle text-textMuted text-sm";
+            textSmall.className = "text-textMuted";
+            textSmall.innerText = `0 follow ups today`;
+            if (redDot) redDot.style.display = 'none';
+            modalList.innerHTML = `
+                <div class="text-center text-textMuted py-8">
+                    <i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i>
+                    <p class="text-sm">No follow-ups due today.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        pill.className = "cursor-pointer relative bg-cardBooked/20 border border-accentBooked/30 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1.5 hover:bg-cardBooked/30 transition-colors";
+        iconSmall.className = "ph-fill ph-bell-ringing text-accentBooked animate-pulse text-sm";
+        textSmall.className = "text-accentBooked";
+        textSmall.innerText = `${list.length} follow ups today`;
+        
+        if (redDot) {
+            redDot.style.display = followUpsViewed ? 'none' : 'block';
+        }
+        
+        modalList.innerHTML = list.map(f => `
+            <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-accentBooked/10 flex items-center justify-center text-accentBooked shrink-0">
+                        <i class="ph-fill ph-phone-call text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-textMain">${f.name}</p>
+                        <p class="text-[10px] font-semibold text-textMuted">Consulted on: ${f.date}</p>
+                    </div>
+                </div>
+                <button onclick="openPatientHistoryFromDirectory('${f.id}', '${f.name}'); closeModal('followUpModal');" class="bg-appBg hover:bg-black/20 text-textMuted hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-appBorder">
+                    <i class="ph-bold ph-caret-right"></i>
+                </button>
+            </div>
+        `).join('');
     }
-
-    function copyWaMessage() {
-        const msg = document.getElementById('waMessageText').value;
-        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
-    }
-
-    function sendWaMessage() {
-        const msg = encodeURIComponent(document.getElementById('waMessageText').value);
-        let phone = document.getElementById('waMessageText').dataset.phone;
-        phone = phone.replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone; 
-        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    
+    function openFollowUpModal() { 
+        followUpsViewed = true;
+        const redDot = document.getElementById('followUpRedDot');
+        if (redDot) redDot.style.display = 'none';
+        openModal('followUpModal'); 
     }
 
     // ==========================================
-    // EDIT PATIENT INFO (Godmode)
+    // EDIT PATIENT INFO
     // ==========================================
     function toggleEditPatientInfo() {
         const div = document.getElementById('editPatientInfoDiv');
@@ -1206,7 +1438,7 @@
             if(data.success) {
                 showToast("Patient info updated!");
                 document.getElementById('editPatientInfoDiv').classList.add('hidden');
-                fetchAllPatients(); // refresh background cache
+                forceSyncDatabase(); // Background update cache
                 currentBookingPhone = nPhone;
             } else { showToast(data.message, "error"); }
         } catch(e) { showToast("Connection failed.", "error"); }
@@ -1252,7 +1484,7 @@
                 form.reset();
                 btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText;
                 btnSave.disabled = false; btnSaveBook.disabled = false;
-                fetchAllPatients(); 
+                forceSyncDatabase(); 
             }, 1000);
             return;
         }
@@ -1270,7 +1502,7 @@
                     }, 400);
                 }
                 form.reset();
-                fetchAllPatients(); 
+                forceSyncDatabase(); 
             } else { showToast(data.message, "error"); }
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally {
