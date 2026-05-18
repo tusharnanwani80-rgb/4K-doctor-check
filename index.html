@@ -214,10 +214,14 @@
             </div>
             <p class="text-textMuted text-sm font-medium mt-1">Dr. Rajubhau Pise</p>
         </div>
-        <div class="relative self-start mt-4 flex gap-2">
+        <div class="relative self-start mt-4 flex gap-2 flex-col items-end">
             <button onclick="toggleTheme()" class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
                 <i id="themeIcon" class="ph-bold ph-sun text-xl"></i>
             </button>
+            <!-- STORAGE FULL PILL (Godmode Panic Alert) -->
+            <div id="storageFullPill" class="hidden absolute top-12 right-0 mt-1 bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 whitespace-nowrap shadow-sm">
+                <i class="ph-fill ph-warning-circle text-sm"></i> Storage Full
+            </div>
         </div>
     </div>
 
@@ -594,7 +598,7 @@
                         <option value="Herb">Herb</option>
                         <option value="Diet">Diet</option>
                         <option value="Yoga">Yoga</option>
-                        <option value="Therapy">Therapy</option>
+                        <option value="Therapy">Theroption>
                     </select>
                 </div>
                 <div>
@@ -819,16 +823,23 @@
     }
 
     // ==========================================
-    // SETTINGS (Wait Time)
+    // SETTINGS (Wait Time & System Status)
     // ==========================================
     async function fetchSettings() {
         if(!GAS_WEB_APP_URL) return;
         try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getSettings' }) });
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getSystemStatus' }) });
             const data = await res.json();
             if(data.success) {
                 document.getElementById('settingWaitTime').value = data.data.avgWaitTime;
                 document.getElementById('statAvgWait').innerText = data.data.avgWaitTime + 'm';
+                
+                // Toggle Storage Full Pill
+                if(data.data.storageFull) {
+                    document.getElementById('storageFullPill').classList.remove('hidden');
+                } else {
+                    document.getElementById('storageFullPill').classList.add('hidden');
+                }
             }
         } catch(e) {}
     }
@@ -1406,6 +1417,54 @@
         const redDot = document.getElementById('followUpRedDot');
         if (redDot) redDot.style.display = 'none';
         openModal('followUpModal'); 
+    }
+
+    // ==========================================
+    // WHATSAPP & CALENDAR LOGIC
+    // ==========================================
+    function generateCalendarLink(dateStr, timeStr) {
+        try {
+            let [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours, 10);
+            if (modifier === 'PM' && hours < 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+
+            let startDt = new Date(dateStr);
+            startDt.setHours(hours, parseInt(minutes), 0);
+            let endDt = new Date(startDt.getTime() + 30*60000);
+
+            const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`;
+        } catch(e) {
+            return "https://calendar.google.com/";
+        }
+    }
+
+    function showBookingSuccess(patientName, date, time, tokenNo, patientPhone) {
+        const calLink = generateCalendarLink(date, time);
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        const prettyDate = new Date(date).toLocaleDateString('en-US', options);
+
+        const msg = `Namaste ${patientName} ji! 🌿\n\nYour appointment is confirmed.\n(आपकी अपॉइंटमेंट पक्की हो गई है।)\n\n📅 Date (तारीख): ${prettyDate}\n🕙 Time (समय): ${time}\n🎟️ Token (टोकन): #${tokenNo}\n\nTap to add reminder to your phone:\n(रिमाइंडर सेट करने के लिए क्लिक करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
+
+        document.getElementById('waMessageText').value = msg;
+        document.getElementById('waMessageText').dataset.phone = patientPhone || '';
+        
+        switchModal('bookApptModal', 'bookingSuccessModal');
+    }
+
+    function copyWaMessage() {
+        const msg = document.getElementById('waMessageText').value;
+        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
+    }
+
+    function sendWaMessage() {
+        const msg = encodeURIComponent(document.getElementById('waMessageText').value);
+        let phone = document.getElementById('waMessageText').dataset.phone;
+        phone = phone.replace(/\D/g, '');
+        if (phone.length === 10) phone = '91' + phone; 
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
 
     // ==========================================
