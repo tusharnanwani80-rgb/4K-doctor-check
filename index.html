@@ -119,9 +119,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        textarea::-webkit-scrollbar { width: 6px; }
-        textarea::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        
         /* Swipe to delete styles */
         .swipeable-card {
             touch-action: pan-y;
@@ -218,7 +215,6 @@
             <button onclick="toggleTheme()" class="w-10 h-10 bg-textMuted/10 rounded-full flex items-center justify-center border border-appBorder text-textMain hover:bg-textMuted/20 transition">
                 <i id="themeIcon" class="ph-bold ph-sun text-xl"></i>
             </button>
-            <!-- STORAGE FULL PILL (Godmode Panic Alert) -->
             <div id="storageFullPill" class="hidden absolute top-12 right-0 mt-1 bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 whitespace-nowrap shadow-sm">
                 <i class="ph-fill ph-warning-circle text-sm"></i> Storage Full
             </div>
@@ -229,7 +225,6 @@
     <div id="view-home" class="view-section active">
 
         <div class="pt-8 pb-4 bg-appBg sticky top-0 z-10 transition-colors duration-400">
-            <!-- Fixed Date Picker Implementation -->
             <div class="flex justify-center items-center gap-2 mb-6 cursor-pointer relative w-fit mx-auto group" onclick="openDatePicker()">
                 <h2 class="text-xl font-medium text-textMain group-hover:text-accentWait transition-colors" id="currentMonthYear">May 2026</h2>
                 <i class="ph-bold ph-caret-down text-textMuted group-hover:text-accentWait transition-colors"></i>
@@ -345,7 +340,6 @@
 <!-- FULL SCREEN CONSULTATION ROOM -->
 <div id="consultationRoom" class="fixed inset-0 bg-appBg z-[150] slide-up-hidden transition-transform duration-500 ease-in-out flex flex-col max-w-[480px] mx-auto w-full">
     
-    <!-- Header -->
     <div class="bg-appHeader pt-10 pb-6 px-6 rounded-b-[32px] shadow-lg shrink-0 border-b border-appBorder relative">
         <div class="flex justify-between items-center mb-4">
             <button onclick="closeConsultationRoom()" class="w-10 h-10 bg-pillDark rounded-full flex items-center justify-center text-textMain hover:bg-black/20 transition"><i class="ph-bold ph-x text-lg"></i></button>
@@ -353,7 +347,6 @@
             <div class="w-10"></div>
         </div>
         
-        <!-- Draft Alert Banner -->
         <div id="draftAlert" class="hidden absolute top-full left-1/2 transform -translate-x-1/2 -mt-4 bg-[#FFE4C4] text-[#B45309] text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md z-10 flex items-center gap-1 border border-[#F59E0B]">
             <i class="ph-fill ph-clock-counter-clockwise"></i> Draft Restored
         </div>
@@ -371,7 +364,6 @@
         </div>
     </div>
 
-    <!-- Scrollable Body -->
     <div class="flex-1 overflow-y-auto px-6 py-6 pb-36">
         <div class="mb-8">
             <label class="text-[11px] font-bold text-textMuted tracking-wider mb-2 block uppercase">Chief Complaint & Diagnosis</label>
@@ -399,7 +391,6 @@
             <textarea id="consultNotes" oninput="saveDraft()" rows="2" class="w-full rounded-[20px] p-4 text-sm font-medium resize-none shadow-sm placeholder:text-textMuted/50" placeholder="Notes for next visit (Not visible to patient)"></textarea>
         </div>
         
-        <!-- Follow Up Dropdown -->
         <div class="mt-6 p-4 bg-pillDark border border-appBorder rounded-[20px]">
              <label class="text-[11px] font-bold text-textMuted tracking-wider mb-2 block uppercase flex items-center gap-1"><i class="ph-bold ph-calendar"></i> Schedule Follow-up</label>
              <select id="consultFollowUp" class="w-full px-4 py-3 rounded-xl appearance-none text-sm font-bold">
@@ -412,7 +403,6 @@
         </div>
     </div>
 
-    <!-- Floating Action Button Area -->
     <div class="absolute bottom-0 w-full p-6 bg-gradient-to-t from-appBg via-appBg to-transparent shrink-0 pt-12">
         <button onclick="finalizeConsultation()" id="btnFinalize" class="w-full py-4 bg-cardDone text-[#0B1120] rounded-[24px] font-extrabold text-lg flex justify-center items-center gap-2 shadow-[0_10px_20px_rgba(217,244,167,0.15)] hover:scale-[1.02] active:scale-[0.98] transition-transform">
             <i class="ph-bold ph-paper-plane-tilt"></i> <span id="btnFinalizeText">Send Prescription</span>
@@ -422,7 +412,7 @@
 
 <!-- ALL MODALS -->
 
-<!-- Follow Up Alert Modal (NEW) -->
+<!-- Follow Up Alert Modal -->
 <div id="followUpModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder max-h-[80vh] overflow-y-auto" id="followUpModalContent">
         <div class="w-12 h-1.5 bg-textMuted/30 rounded-full mx-auto mb-6 shrink-0"></div>
@@ -433,17 +423,13 @@
             </div>
             <button onclick="closeModal('followUpModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
         </div>
-        
         <div id="followUpList" class="space-y-3 pb-6">
-            <div class="text-center text-textMuted py-8">
-                <i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i>
-                <p class="text-sm">No follow-ups due today.</p>
-            </div>
+            <div class="text-center text-textMuted py-8"><i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i><p class="text-sm">No follow-ups due today.</p></div>
         </div>
     </div>
 </div>
 
-<!-- Patient Note Modal (NEW) -->
+<!-- Patient Note Modal -->
 <div id="patientNoteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="patientNoteModalContent">
         <div class="flex justify-between items-center mb-6">
@@ -458,7 +444,7 @@
     </div>
 </div>
 
-<!-- WhatsApp / Calendar Success Modal (For Booking) -->
+<!-- WhatsApp / Calendar Success Modal -->
 <div id="bookingSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="bookingSuccessModalContent">
         <div class="flex justify-between items-center mb-6">
@@ -468,24 +454,18 @@
             </div>
             <button onclick="closeModal('bookingSuccessModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
         </div>
-        
         <p class="text-xs font-bold text-textMuted mb-2 uppercase tracking-wide">Share via WhatsApp</p>
         <div class="bg-inputBg border border-appBorder rounded-2xl p-4 mb-6">
             <textarea id="waMessageText" readonly rows="8" class="w-full bg-transparent text-sm font-medium text-textMain border-none resize-none focus:ring-0 p-0"></textarea>
         </div>
-
         <div class="flex gap-3">
-            <button onclick="copyWaMessage()" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/10 transition">
-                <i class="ph-bold ph-copy"></i> Copy
-            </button>
-            <button onclick="sendWaMessage()" class="w-2/3 py-4 bg-[#25D366] text-white rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-[#25D366]/20">
-                <i class="ph-bold ph-whatsapp-logo text-xl"></i> Send to Patient
-            </button>
+            <button onclick="copyWaMessage()" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/10 transition"><i class="ph-bold ph-copy"></i> Copy</button>
+            <button onclick="sendWaMessage()" class="w-2/3 py-4 bg-[#25D366] text-white rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-[#25D366]/20"><i class="ph-bold ph-whatsapp-logo text-xl"></i> Send to Patient</button>
         </div>
     </div>
 </div>
 
-<!-- Prescription Success Modal (For Send Prescription) -->
+<!-- Prescription Success Modal -->
 <div id="prescriptionSuccessModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[180] hidden flex flex-col justify-end max-w-[480px] mx-auto">
     <div class="bg-appHeader w-full rounded-t-[40px] p-6 transform transition-transform translate-y-full border-t border-appBorder" id="prescriptionSuccessModalContent">
         <div class="flex justify-between items-center mb-6">
@@ -495,19 +475,13 @@
             </div>
             <button onclick="closeModal('prescriptionSuccessModal')" class="w-8 h-8 bg-pillDark border border-appBorder rounded-full flex items-center justify-center text-textMuted hover:text-textMain transition"><i class="ph-bold ph-x"></i></button>
         </div>
-        
         <p class="text-[11px] font-bold text-textMuted mb-2 uppercase tracking-wide flex items-center gap-1"><i class="ph-fill ph-envelope-simple text-accentWait"></i> Email sent automatically. Share via WhatsApp:</p>
         <div class="bg-inputBg border border-appBorder rounded-2xl p-4 mb-6">
             <textarea id="rxWaMessageText" readonly rows="8" class="w-full bg-transparent text-sm font-medium text-textMain border-none resize-none focus:ring-0 p-0"></textarea>
         </div>
-
         <div class="flex gap-3">
-            <button onclick="copyRxWaMessage()" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/10 transition">
-                <i class="ph-bold ph-copy"></i> Copy
-            </button>
-            <button onclick="sendRxWaMessage()" class="w-2/3 py-4 bg-[#25D366] text-white rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-[#25D366]/20">
-                <i class="ph-bold ph-whatsapp-logo text-xl"></i> Send to Patient
-            </button>
+            <button onclick="copyRxWaMessage()" class="w-1/3 py-4 bg-pillDark border border-appBorder text-textMain rounded-2xl font-bold flex justify-center items-center gap-2 hover:bg-black/10 transition"><i class="ph-bold ph-copy"></i> Copy</button>
+            <button onclick="sendRxWaMessage()" class="w-2/3 py-4 bg-[#25D366] text-white rounded-2xl font-extrabold flex justify-center items-center gap-2 hover:opacity-90 transition shadow-lg shadow-[#25D366]/20"><i class="ph-bold ph-whatsapp-logo text-xl"></i> Send to Patient</button>
         </div>
     </div>
 </div>
@@ -598,7 +572,7 @@
                         <option value="Herb">Herb</option>
                         <option value="Diet">Diet</option>
                         <option value="Yoga">Yoga</option>
-                        <option value="Therapy">Theroption>
+                        <option value="Therapy">Therapy</option>
                     </select>
                 </div>
                 <div>
@@ -716,7 +690,6 @@
                     </div>
                 </div>
                 
-                <!-- Editable fields -->
                 <div id="editPatientInfoDiv" class="hidden mt-3 pt-3 border-t border-cardDone/20 space-y-3">
                      <p class="text-[10px] font-bold text-accentWait uppercase">Update Details</p>
                      <input type="tel" id="editPatPhone" class="w-full px-3 py-2 rounded-lg text-sm bg-appBg/50 border-appBorder" placeholder="Phone Number">
@@ -771,10 +744,64 @@
     let tempProtocol = []; 
     let activeCategoryFilter = 'All';
     let editPrescriptionModeId = null; 
-    let followUpsViewed = false; // Godmode: Tracks if red dot should be cleared
+    let followUpsViewed = false; 
     
     let currentHistoryData = { prescriptions: [], reports: [] };
     let activeHistoryTab = 'consults';
+    
+    // GODMODE: Offline Outbox state
+    let rxOutbox = JSON.parse(localStorage.getItem('rxOutbox') || '[]');
+
+    // ==========================================
+    // GODMODE: INDEXED DB FOR 5000+ PATIENTS
+    // ==========================================
+    const DB_NAME = "ClinicDB";
+    const STORE_NAME = "patients";
+    let db;
+
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: "patientId" });
+                }
+            };
+            req.onsuccess = (e) => { db = e.target.result; resolve(); };
+            req.onerror = (e) => { reject(e.target.error); };
+        });
+    }
+
+    function savePatientsDB(patients) {
+        return new Promise((resolve) => {
+            if (!db) return resolve();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            store.clear();
+            patients.forEach(p => store.put(p));
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    function getPatientsDB() {
+        return new Promise((resolve) => {
+            if (!db) return resolve([]);
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const req = tx.objectStore(STORE_NAME).getAll();
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve([]);
+        });
+    }
+
+    function clearPatientsDB() {
+        return new Promise((resolve) => {
+            if (!db) return resolve();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            tx.objectStore(STORE_NAME).clear();
+            tx.oncomplete = () => resolve();
+        });
+    }
 
     // ==========================================
     // INITIALIZATION & THEME
@@ -789,13 +816,18 @@
         fetchSettings(); 
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Double booking fix: Prevent past dates in UI
+        const todayStrLocal = new Date().toISOString().split('T')[0];
+        document.getElementById('baDate').min = todayStrLocal;
+        
+        await initDB();
         renderDateSelector();
         fetchQueueData();
         fetchRemedyMaster(); 
         fetchTemplates();
         fetchAllPatients(); 
-        fetchFollowUps(); // Fetches immediately on load now
+        fetchFollowUps(); 
     });
 
     function startApp() {
@@ -834,12 +866,8 @@
                 document.getElementById('settingWaitTime').value = data.data.avgWaitTime;
                 document.getElementById('statAvgWait').innerText = data.data.avgWaitTime + 'm';
                 
-                // Toggle Storage Full Pill
-                if(data.data.storageFull) {
-                    document.getElementById('storageFullPill').classList.remove('hidden');
-                } else {
-                    document.getElementById('storageFullPill').classList.add('hidden');
-                }
+                if(data.data.storageFull) document.getElementById('storageFullPill').classList.remove('hidden');
+                else document.getElementById('storageFullPill').classList.add('hidden');
             }
         } catch(e) {}
     }
@@ -899,11 +927,8 @@
         activeIcon.className = `ph-fill ph-${iconName(viewName)} text-[26px]`;
         activeDot.className = "w-1 h-1 bg-textMain rounded-full mt-1";
 
-        // Hide follow-up pill if not on home screen
         const followUpPill = document.getElementById('followUpPill');
-        if(followUpPill) {
-            followUpPill.style.display = viewName === 'home' ? 'flex' : 'none';
-        }
+        if(followUpPill) followUpPill.style.display = viewName === 'home' ? 'flex' : 'none';
 
         if(viewName === 'home') scrollToCurrent();
     }
@@ -916,32 +941,30 @@
     }
 
     // ==========================================
-    // PATIENTS DIRECTORY (Scalable Cache & Swipe)
+    // PATIENTS DIRECTORY (Godmode IndexedDB Cache & Swipe)
     // ==========================================
     async function fetchAllPatients() {
-        // Godmode: Load from cache first for zero delay
-        const cached = localStorage.getItem('clinic_patients_cache');
-        if (cached) {
-            allPatientsDirectory = JSON.parse(cached);
+        const cached = await getPatientsDB();
+        if (cached && cached.length > 0) {
+            allPatientsDirectory = cached;
             renderDirectory();
         }
 
         if(!GAS_WEB_APP_URL) {
-            if(!cached) {
-                allPatientsDirectory = [{patientId: 'NCC-001', name: 'Rahul Sharma', phone: '9876543210'}, {patientId: 'NCC-042', name: 'Anita Desai', phone: '9988776655'}];
+            if(!cached || cached.length === 0) {
+                allPatientsDirectory = [{patientId: 'NCC-001', name: 'Rahul Sharma', phone: '9876543210'}];
                 renderDirectory();
             }
             return;
         }
 
         try {
-            // Fetch silently in background
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'searchPatient', query: '' }) });
             const data = await res.json();
             if(data.success) {
                 allPatientsDirectory = data.data;
-                localStorage.setItem('clinic_patients_cache', JSON.stringify(data.data));
-                renderDirectory(); // Update silently
+                await savePatientsDB(data.data);
+                renderDirectory(); 
             }
         } catch(e) {}
     }
@@ -987,41 +1010,24 @@
         `).join('');
     }
 
-    // Godmode: Swipe Logic for Directory
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
+    let startX = 0; let currentX = 0; let isDragging = false;
 
-    function handleSwipeStart(e, el) {
-        startX = e.touches ? e.touches[0].clientX : e.clientX;
-        isDragging = true;
-        el.style.transition = 'none';
-    }
-    
+    function handleSwipeStart(e, el) { startX = e.touches ? e.touches[0].clientX : e.clientX; isDragging = true; el.style.transition = 'none'; }
     function handleSwipeMove(e, el) {
         if(!isDragging) return;
         currentX = e.touches ? e.touches[0].clientX : e.clientX;
         let diff = currentX - startX;
-        if(diff < 0 && diff >= -140) { // dragging left
-            el.style.transform = `translateX(${diff}px)`;
-        }
+        if(diff < 0 && diff >= -140) el.style.transform = `translateX(${diff}px)`;
     }
-    
     function handleSwipeEnd(e, el) {
         if(!isDragging) return;
         isDragging = false;
         el.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         let diff = currentX - startX;
-        
         if(diff < -50) {
-            el.style.transform = `translateX(-128px)`; // 2 buttons width
-            // Close other swiped cards
-            document.querySelectorAll('.swipeable-card').forEach(card => {
-                if(card !== el) { card.style.transform = 'translateX(0)'; }
-            });
-        } else {
-            el.style.transform = `translateX(0)`;
-        }
+            el.style.transform = `translateX(-128px)`; 
+            document.querySelectorAll('.swipeable-card').forEach(card => { if(card !== el) card.style.transform = 'translateX(0)'; });
+        } else { el.style.transform = `translateX(0)`; }
     }
 
     function filterDirectory() {
@@ -1040,13 +1046,11 @@
         openConsultationRoom(mockAppt);
     }
     
-    // Patient Swipe Actions API Handlers
     function openPatientNoteModal(pId, pName) {
         document.getElementById('pnPatName').innerText = pName;
         document.getElementById('pnNoteText').dataset.pid = pId;
-        document.getElementById('pnNoteText').value = ""; // clear old
+        document.getElementById('pnNoteText').value = ""; 
         openModal('patientNoteModal');
-        // Reset card swipe
         document.querySelectorAll('.swipeable-card').forEach(card => card.style.transform = 'translateX(0)');
     }
     
@@ -1061,7 +1065,7 @@
             return;
         }
         try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'addPatientNote', patientId: pId, note: note }) });
+            await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'addPatientNote', patientId: pId, note: note }) });
             showToast("Private Note saved!");
             closeModal('patientNoteModal');
         } catch(e) { showToast("Error saving note", "error"); }
@@ -1071,20 +1075,33 @@
     async function deletePatient(pId) {
         if(!confirm("Are you sure you want to delete this patient record?")) return;
         
-        // Optimistic UI update
+        const backupCache = JSON.stringify(allPatientsDirectory);
         allPatientsDirectory = allPatientsDirectory.filter(p => p.patientId !== pId);
-        localStorage.setItem('clinic_patients_cache', JSON.stringify(allPatientsDirectory));
+        await savePatientsDB(allPatientsDirectory);
         renderDirectory();
         
         if(!GAS_WEB_APP_URL) { showToast("Patient Deleted!"); return; }
+        
         try {
-            fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'deletePatient', patientId: pId }) });
-            showToast("Patient Deleted!");
-        } catch(e) {}
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'deletePatient', patientId: pId }) });
+            const data = await res.json();
+            if (data.success) { showToast("Patient Deleted!"); } 
+            else {
+                allPatientsDirectory = JSON.parse(backupCache);
+                await savePatientsDB(allPatientsDirectory);
+                renderDirectory();
+                showToast(data.message, "error");
+            }
+        } catch(e) {
+            allPatientsDirectory = JSON.parse(backupCache);
+            await savePatientsDB(allPatientsDirectory);
+            renderDirectory();
+            showToast("Failed to delete from database.", "error");
+        }
     }
     
-    function forceSyncDatabase() {
-        localStorage.removeItem('clinic_patients_cache');
+    async function forceSyncDatabase() {
+        await clearPatientsDB();
         fetchAllPatients();
         fetchRemedyMaster(); 
         fetchTemplates(); 
@@ -1092,7 +1109,7 @@
     }
 
     // ==========================================
-    // UTILS & QUEUE (With Analytics Update)
+    // UTILS & QUEUE
     // ==========================================
     function formatTimeDisplay(timeVal) {
         if (!timeVal) return "";
@@ -1107,25 +1124,18 @@
         const scroller = document.getElementById('dateScroller');
         document.getElementById('currentMonthYear').innerText = selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         
-        // Sync hidden date picker value
         const dateInput = document.getElementById('hiddenDatePicker');
         if(dateInput) dateInput.value = selectedDate.toISOString().split('T')[0];
 
         scroller.innerHTML = "";
-        
         for(let i = -2; i <= 4; i++) {
-            let d = new Date(selectedDate);
-            d.setDate(d.getDate() + i);
+            let d = new Date(selectedDate); d.setDate(d.getDate() + i);
             const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
             const dateNum = d.getDate();
             const isToday = i === 0;
             const dateBtn = document.createElement('div');
             
-            dateBtn.onclick = () => {
-                selectedDate = new Date(d);
-                renderDateSelector();
-                fetchQueueData();
-            };
+            dateBtn.onclick = () => { selectedDate = new Date(d); renderDateSelector(); fetchQueueData(); };
             
             if (isToday) {
                 dateBtn.className = `flex flex-col items-center justify-center w-[64px] h-[100px] rounded-full bg-cardDone text-[#0B1120] shadow-[0_10px_20px_rgba(217,244,167,0.15)] transform -translate-y-2 shrink-0 cursor-pointer transition-colors duration-400`;
@@ -1140,113 +1150,63 @@
 
     function openDatePicker() {
         const picker = document.getElementById('hiddenDatePicker');
-        try {
-            if (typeof picker.showPicker === 'function') {
-                picker.showPicker();
-            } else {
-                picker.focus();
-                picker.click();
-            }
-        } catch(e) {}
+        try { if (typeof picker.showPicker === 'function') picker.showPicker(); else { picker.focus(); picker.click(); } } catch(e) {}
     }
 
     function showToast(message, type = 'success') {
         const toast = document.getElementById('toast');
-        const msg = document.getElementById('toastMsg');
-        const icon = document.getElementById('toastIcon');
-        msg.innerText = message;
+        document.getElementById('toastMsg').innerText = message;
+        document.getElementById('toastIcon').className = type === 'success' ? 'ph-fill ph-check-circle text-xl' : 'ph-fill ph-warning-circle text-xl text-red-300';
         toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full font-bold text-sm shadow-2xl transition-all duration-300 max-w-[90%] whitespace-nowrap pointer-events-none`;
-        if (type === 'success') {
-            toast.classList.add('bg-cardDone', 'text-[#0B1120]');
-            icon.className = 'ph-fill ph-check-circle text-xl';
-        } else {
-            toast.classList.add('bg-red-500', 'text-white');
-            icon.className = 'ph-fill ph-warning-circle text-xl';
-        }
-        requestAnimationFrame(() => {
-            toast.classList.remove('-translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-        });
-        setTimeout(() => {
-            toast.classList.remove('translate-y-0', 'opacity-100');
-            toast.classList.add('-translate-y-20', 'opacity-0');
-        }, 3000);
+        if (type === 'success') { toast.classList.add('bg-cardDone', 'text-[#0B1120]'); toast.classList.remove('bg-red-500', 'text-white'); } 
+        else { toast.classList.add('bg-red-500', 'text-white'); toast.classList.remove('bg-cardDone', 'text-[#0B1120]'); }
+        requestAnimationFrame(() => { toast.classList.remove('-translate-y-20', 'opacity-0'); toast.classList.add('translate-y-0', 'opacity-100'); });
+        setTimeout(() => { toast.classList.remove('translate-y-0', 'opacity-100'); toast.classList.add('-translate-y-20', 'opacity-0'); }, 3000);
     }
 
     function openModal(id) {
-        const modal = document.getElementById(id);
-        const content = document.getElementById(id + 'Content');
-        modal.classList.remove('hidden');
-        setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
+        const modal = document.getElementById(id); const content = document.getElementById(id + 'Content');
+        modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('translate-y-full'); }, 10);
     }
     function closeModal(id) {
-        const modal = document.getElementById(id);
-        const content = document.getElementById(id + 'Content');
-        content.classList.add('translate-y-full');
-        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        const modal = document.getElementById(id); const content = document.getElementById(id + 'Content');
+        content.classList.add('translate-y-full'); setTimeout(() => { modal.classList.add('hidden'); }, 300);
     }
-    function switchModal(closeId, openId) {
-        closeModal(closeId);
-        setTimeout(() => { openModal(openId); }, 300);
-    }
+    function switchModal(closeId, openId) { closeModal(closeId); setTimeout(() => { openModal(openId); }, 300); }
 
-    function changeDateFromPicker(val) {
-        if(!val) return;
-        selectedDate = new Date(val);
-        renderDateSelector();
-        fetchQueueData();
-    }
+    function changeDateFromPicker(val) { if(!val) return; selectedDate = new Date(val); renderDateSelector(); fetchQueueData(); }
 
     function scrollToCurrent() {
         if (currentQueueData.length === 0) return;
-        let targetItem = currentQueueData.find(q => q.status === 'In Consultation');
-        if (!targetItem) targetItem = currentQueueData.find(q => q.status === 'Waiting');
-        if (!targetItem) targetItem = currentQueueData.find(q => q.status === 'Booked');
-
+        let targetItem = currentQueueData.find(q => q.status === 'In Consultation') || currentQueueData.find(q => q.status === 'Waiting') || currentQueueData.find(q => q.status === 'Booked');
         if (targetItem) {
             const el = document.getElementById(`card-token-${targetItem.tokenNo}`);
-            if (el) {
-                const y = el.getBoundingClientRect().top + window.scrollY - 180; 
-                window.scrollTo({ top: y, behavior: 'smooth' });
-            }
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+            if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 180, behavior: 'smooth' });
+        } else window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function fetchQueueData() {
         const container = document.getElementById('queueContainer');
         container.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading queue...</p></div>`;
         try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] })
-            });
+            const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getQueue', date: selectedDate.toISOString().split('T')[0] }) });
             const result = await response.json();
             if(result.success) {
                 currentQueueData = result.data;
                 renderQueue();
-                
-                // GODMODE: Update Live Analytics (Total Consults Today)
                 document.getElementById('statTotalConsults').innerText = currentQueueData.length;
-                
                 setTimeout(scrollToCurrent, 300);
             } else showToast(result.message, "error");
-        } catch (e) {
-            container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`;
-        }
+        } catch (e) { container.innerHTML = `<div class="text-center text-red-400 py-20 font-medium">Failed to load data.</div>`; }
     }
 
     async function handleQueueAction(tokenNo, currentStatus) {
         const item = currentQueueData.find(q => q.tokenNo === tokenNo);
         if (!item) return;
 
-        if (currentStatus === 'Waiting') {
+        if (currentStatus === 'Waiting' || currentStatus === 'In Consultation') {
             openConsultationRoom(item);
-            advanceStatusBackground(tokenNo, 'Waiting', 'In Consultation');
-            return;
-        } else if (currentStatus === 'In Consultation') {
-            openConsultationRoom(item);
+            if(currentStatus === 'Waiting') advanceStatusBackground(tokenNo, 'Waiting', 'In Consultation');
             return;
         }
 
@@ -1262,28 +1222,19 @@
 
     async function advanceStatusBackground(tokenNo, oldStatus, newStatus) {
         try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus })
-            });
+            const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', tokenNo: tokenNo, date: selectedDate.toISOString().split('T')[0], newStatus: newStatus }) });
             const result = await response.json();
             if(!result.success) {
                 const item = currentQueueData.find(q => q.tokenNo === tokenNo);
                 if(item) item.status = oldStatus;
-                renderQueue();
-                showToast("Failed to sync status.", "error");
+                renderQueue(); showToast("Failed to sync status.", "error");
             }
         } catch(e) {}
     }
 
     function renderQueue(animatedTokenNo = null) {
-        const container = document.getElementById('queueContainer');
-        container.innerHTML = "";
-
-        if(currentQueueData.length === 0) {
-            container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`;
-            return;
-        }
+        const container = document.getElementById('queueContainer'); container.innerHTML = "";
+        if(currentQueueData.length === 0) { container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`; return; }
 
         currentQueueData.forEach((appt, index) => {
             let bgColor, iconClass, nextAction;
@@ -1298,13 +1249,9 @@
             const animClass = animatedTokenNo === appt.tokenNo ? 'card-update-anim' : '';
 
             let btnHtml = '';
-            if (appt.status === 'Waiting' || appt.status === 'In Consultation') {
-                btnHtml = `<button onclick="handleQueueAction(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">${nextAction} <i class="ph-bold ph-arrow-right"></i></button>`;
-            } else if (nextAction) {
-                btnHtml = `<button onclick="handleQueueAction(${appt.tokenNo}, '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">${nextAction} <i class="ph-bold ph-check"></i></button>`;
-            } else {
-                 btnHtml = `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`;
-            }
+            if (appt.status === 'Waiting' || appt.status === 'In Consultation') btnHtml = `<button onclick="handleQueueAction('${appt.tokenNo}', '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">${nextAction} <i class="ph-bold ph-arrow-right"></i></button>`;
+            else if (nextAction) btnHtml = `<button onclick="handleQueueAction('${appt.tokenNo}', '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">${nextAction} <i class="ph-bold ph-check"></i></button>`;
+            else btnHtml = `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`;
 
             container.innerHTML += `
                 <div id="card-token-${appt.tokenNo}" class="flex h-full group ${animClass}">
@@ -1314,9 +1261,7 @@
                         ${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}
                     </div>
                     <div class="flex-1 pl-3 pb-8">
-                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm">
-                            <i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}
-                        </div>
+                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm"><i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}</div>
                         <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
                             <div class="flex justify-between items-start">
                                 <div>
@@ -1325,11 +1270,7 @@
                                 </div>
                             </div>
                             <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center">
-                                <div class="flex -space-x-2">
-                                    <button onclick="openPatientHistoryFromDirectory('${appt.patientId}', '${appt.patientName}')" class="w-8 h-8 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center hover:scale-110 transition-transform cursor-pointer shadow-md" title="View Patient History">
-                                        <i class="ph-fill ph-file-text text-[12px] text-white"></i>
-                                    </button>
-                                </div>
+                                <button onclick="openPatientHistoryFromDirectory('${appt.patientId}', '${appt.patientName}')" class="w-8 h-8 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center hover:scale-110 transition-transform shadow-md"><i class="ph-fill ph-file-text text-[12px] text-white"></i></button>
                                 ${btnHtml}
                             </div>
                         </div>
@@ -1340,24 +1281,15 @@
     }
 
     // ==========================================
-    // FOLLOW-UP SYSTEM (Godmode)
+    // FOLLOW-UP SYSTEM (Godmode Fix 1: Mark Done)
     // ==========================================
     async function fetchFollowUps() {
-        if(!GAS_WEB_APP_URL) {
-            renderFollowUps([{name: 'Rahul Sharma', date: '2026-05-15', id: 'NCC-001'}]);
-            return;
-        }
+        if(!GAS_WEB_APP_URL) { renderFollowUps([{name: 'Rahul Sharma', date: '2026-05-15', id: 'NCC-001'}]); return; }
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getTodayFollowUps' }) });
             const data = await res.json();
-            if(data.success) {
-                renderFollowUps(data.data);
-            } else {
-                renderFollowUps([]);
-            }
-        } catch(e) {
-            console.error("Followups error", e);
-        }
+            if(data.success) renderFollowUps(data.data); else renderFollowUps([]);
+        } catch(e) {}
     }
     
     function renderFollowUps(list) {
@@ -1367,47 +1299,33 @@
         const modalList = document.getElementById('followUpList');
         const redDot = document.getElementById('followUpRedDot');
         
-        // Ensure pill logic respects the current view display state
         pill.style.display = document.getElementById('view-home').classList.contains('active') ? 'flex' : 'none';
         
         if(!list || list.length === 0) {
             pill.className = "cursor-pointer relative bg-pillDark border border-appBorder px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1 hover:bg-black/10 transition-colors";
             iconSmall.className = "ph-bold ph-check-circle text-textMuted text-sm";
-            textSmall.className = "text-textMuted";
-            textSmall.innerText = `0 follow ups today`;
+            textSmall.className = "text-textMuted"; textSmall.innerText = `0 follow ups today`;
             if (redDot) redDot.style.display = 'none';
-            modalList.innerHTML = `
-                <div class="text-center text-textMuted py-8">
-                    <i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i>
-                    <p class="text-sm">No follow-ups due today.</p>
-                </div>
-            `;
+            modalList.innerHTML = `<div class="text-center text-textMuted py-8"><i class="ph-bold ph-check-circle text-3xl opacity-50 mb-2"></i><p class="text-sm">No follow-ups due today.</p></div>`;
             return;
         }
         
         pill.className = "cursor-pointer relative bg-cardBooked/20 border border-accentBooked/30 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1.5 hover:bg-cardBooked/30 transition-colors";
         iconSmall.className = "ph-fill ph-bell-ringing text-accentBooked animate-pulse text-sm";
-        textSmall.className = "text-accentBooked";
-        textSmall.innerText = `${list.length} follow ups today`;
-        
-        if (redDot) {
-            redDot.style.display = followUpsViewed ? 'none' : 'block';
-        }
+        textSmall.className = "text-accentBooked"; textSmall.innerText = `${list.length} follow ups today`;
+        if (redDot) redDot.style.display = followUpsViewed ? 'none' : 'block';
         
         modalList.innerHTML = list.map(f => `
             <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-accentBooked/10 flex items-center justify-center text-accentBooked shrink-0">
-                        <i class="ph-fill ph-phone-call text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm text-textMain">${f.name}</p>
-                        <p class="text-[10px] font-semibold text-textMuted">Consulted on: ${f.date}</p>
-                    </div>
+                    <div class="w-10 h-10 rounded-full bg-accentBooked/10 flex items-center justify-center text-accentBooked shrink-0"><i class="ph-fill ph-phone-call text-xl"></i></div>
+                    <div><p class="font-bold text-sm text-textMain">${f.name}</p><p class="text-[10px] font-semibold text-textMuted">Consulted on: ${f.date}</p></div>
                 </div>
-                <button onclick="openPatientHistoryFromDirectory('${f.id}', '${f.name}'); closeModal('followUpModal');" class="bg-appBg hover:bg-black/20 text-textMuted hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-appBorder">
-                    <i class="ph-bold ph-caret-right"></i>
-                </button>
+                <div class="flex items-center">
+                    <button onclick="openPatientHistoryFromDirectory('${f.id}', '${f.name}'); closeModal('followUpModal');" class="bg-appBg hover:bg-black/20 text-textMuted hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-appBorder"><i class="ph-bold ph-caret-right"></i></button>
+                    <!-- Godmode Fix 1: Mark Done Button -->
+                    <button onclick="markFollowUpDone('${f.id}', event)" class="bg-green-50 text-green-600 hover:bg-green-500 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-green-200 shadow-sm ml-2" title="Mark Done"><i class="ph-bold ph-check"></i></button>
+                </div>
             </div>
         `).join('');
     }
@@ -1419,568 +1337,294 @@
         openModal('followUpModal'); 
     }
 
+    async function markFollowUpDone(pId, event) {
+        const btn = event.currentTarget;
+        btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i>`;
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'completeFollowUp', patientId: pId }) });
+            const data = await res.json();
+            if(data.success) { showToast("Follow-up marked as Completed!"); fetchFollowUps(); } 
+            else { showToast(data.message, "error"); btn.innerHTML = `<i class="ph-bold ph-check"></i>`; }
+        } catch(e) { showToast("Network error", "error"); btn.innerHTML = `<i class="ph-bold ph-check"></i>`; }
+    }
+
     // ==========================================
-    // WHATSAPP & CALENDAR LOGIC
+    // WHATSAPP & BOOKING
     // ==========================================
     function generateCalendarLink(dateStr, timeStr) {
         try {
-            let [time, modifier] = timeStr.split(' ');
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours, 10);
-            if (modifier === 'PM' && hours < 12) hours += 12;
-            if (modifier === 'AM' && hours === 12) hours = 0;
-
-            let startDt = new Date(dateStr);
-            startDt.setHours(hours, parseInt(minutes), 0);
+            let [time, modifier] = timeStr.split(' '); let [hours, minutes] = time.split(':'); hours = parseInt(hours, 10);
+            if (modifier === 'PM' && hours < 12) hours += 12; if (modifier === 'AM' && hours === 12) hours = 0;
+            let startDt = new Date(dateStr); startDt.setHours(hours, parseInt(minutes), 0);
             let endDt = new Date(startDt.getTime() + 30*60000);
-
             const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
             return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`;
-        } catch(e) {
-            return "https://calendar.google.com/";
-        }
+        } catch(e) { return "https://calendar.google.com/"; }
     }
 
     function showBookingSuccess(patientName, date, time, tokenNo, patientPhone) {
         const calLink = generateCalendarLink(date, time);
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        const prettyDate = new Date(date).toLocaleDateString('en-US', options);
-
+        const prettyDate = new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
         const msg = `Namaste ${patientName} ji! 🌿\n\nYour appointment is confirmed.\n(आपकी अपॉइंटमेंट पक्की हो गई है।)\n\n📅 Date (तारीख): ${prettyDate}\n🕙 Time (समय): ${time}\n🎟️ Token (टोकन): #${tokenNo}\n\nTap to add reminder to your phone:\n(रिमाइंडर सेट करने के लिए क्लिक करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
-
         document.getElementById('waMessageText').value = msg;
         document.getElementById('waMessageText').dataset.phone = patientPhone || '';
-        
         switchModal('bookApptModal', 'bookingSuccessModal');
     }
 
-    function copyWaMessage() {
-        const msg = document.getElementById('waMessageText').value;
-        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
-    }
-
+    function copyWaMessage() { navigator.clipboard.writeText(document.getElementById('waMessageText').value).then(() => showToast("Message Copied!")); }
     function sendWaMessage() {
         const msg = encodeURIComponent(document.getElementById('waMessageText').value);
-        let phone = document.getElementById('waMessageText').dataset.phone;
-        phone = phone.replace(/\D/g, '');
+        let phone = document.getElementById('waMessageText').dataset.phone.replace(/\D/g, '');
         if (phone.length === 10) phone = '91' + phone; 
         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
 
     // ==========================================
-    // EDIT PATIENT INFO
+    // ACTION APIS (NEW PATIENT & BOOK)
     // ==========================================
     function toggleEditPatientInfo() {
         const div = document.getElementById('editPatientInfoDiv');
         if(div.classList.contains('hidden')) {
             div.classList.remove('hidden');
             const p = allPatientsDirectory.find(x => x.patientId === document.getElementById('baPatientId').value);
-            if(p) {
-                document.getElementById('editPatPhone').value = p.phone;
-                document.getElementById('editPatEmail').value = p.email || '';
-            }
-        } else {
-            div.classList.add('hidden');
-        }
+            if(p) { document.getElementById('editPatPhone').value = p.phone; document.getElementById('editPatEmail').value = p.email || ''; }
+        } else { div.classList.add('hidden'); }
     }
     
     async function saveEditedPatientInfo() {
-        const pId = document.getElementById('baPatientId').value;
-        const nPhone = document.getElementById('editPatPhone').value;
-        const nEmail = document.getElementById('editPatEmail').value;
-        const btn = document.getElementById('btnSavePatInfo');
-        btn.innerText = "Saving...";
-        
+        const pId = document.getElementById('baPatientId').value; const nPhone = document.getElementById('editPatPhone').value; const nEmail = document.getElementById('editPatEmail').value;
+        const btn = document.getElementById('btnSavePatInfo'); btn.innerText = "Saving...";
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePatient', patientId: pId, phone: nPhone, email: nEmail }) });
             const data = await res.json();
             if(data.success) {
-                showToast("Patient info updated!");
-                document.getElementById('editPatientInfoDiv').classList.add('hidden');
-                forceSyncDatabase(); // Background update cache
-                currentBookingPhone = nPhone;
-            } else { showToast(data.message, "error"); }
-        } catch(e) { showToast("Connection failed.", "error"); }
-        finally { btn.innerText = "Save Changes"; }
+                showToast("Patient info updated!"); document.getElementById('editPatientInfoDiv').classList.add('hidden');
+                forceSyncDatabase(); currentBookingPhone = nPhone;
+            } else showToast(data.message, "error");
+        } catch(e) { showToast("Connection failed.", "error"); } finally { btn.innerText = "Save Changes"; }
     }
 
-    // ==========================================
-    // ACTION APIS (NEW PATIENT & BOOK)
-    // ==========================================
     async function submitNewPatient(actionType) {
         const form = document.getElementById('newPatientForm');
         if(!form.checkValidity()) { form.reportValidity(); return; }
-
-        const btnSave = document.getElementById('btnSavePatient');
-        const btnSaveBook = document.getElementById('btnSaveAndBook');
-        const originalSaveText = btnSave.innerHTML;
-        const originalSaveBookText = btnSaveBook.innerHTML;
-
-        if(actionType === 'save') btnSave.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
-        else btnSaveBook.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
-        
+        const btnSave = document.getElementById('btnSavePatient'); const btnSaveBook = document.getElementById('btnSaveAndBook');
+        const originalSaveText = btnSave.innerHTML; const originalSaveBookText = btnSaveBook.innerHTML;
+        if(actionType === 'save') btnSave.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`; else btnSaveBook.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`;
         btnSave.disabled = true; btnSaveBook.disabled = true;
 
-        const payload = {
-            action: 'addPatient',
-            name: document.getElementById('npName').value,
-            phone: document.getElementById('npPhone').value,
-            email: document.getElementById('npEmail').value,
-            age: document.getElementById('npAge').value,
-            gender: document.getElementById('npGender').value,
-        };
-
+        const payload = { action: 'addPatient', name: document.getElementById('npName').value, phone: document.getElementById('npPhone').value, email: document.getElementById('npEmail').value, age: document.getElementById('npAge').value, gender: document.getElementById('npGender').value };
         if(!GAS_WEB_APP_URL) {
-            setTimeout(() => {
-                showToast("Patient Added Successfully!", "success");
-                closeModal('newPatientModal');
-                if(actionType === 'save_book') {
-                    setTimeout(() => {
-                        openModal('bookApptModal');
-                        selectPatient("NCC-NEW", payload.name, payload.phone);
-                    }, 400);
-                }
-                form.reset();
-                btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText;
-                btnSave.disabled = false; btnSaveBook.disabled = false;
-                forceSyncDatabase(); 
-            }, 1000);
-            return;
+            setTimeout(() => { showToast("Patient Added Successfully!", "success"); closeModal('newPatientModal'); if(actionType === 'save_book') setTimeout(() => { openModal('bookApptModal'); selectPatient("NCC-NEW", payload.name, payload.phone); }, 400); form.reset(); btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText; btnSave.disabled = false; btnSaveBook.disabled = false; forceSyncDatabase(); }, 1000); return;
         }
-
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             const data = await res.json();
-            if(data.success) {
-                showToast("Patient Added Successfully!", "success");
-                closeModal('newPatientModal');
-                if (actionType === 'save_book' && data.data && data.data.patientId) {
-                    setTimeout(() => {
-                        openModal('bookApptModal');
-                        selectPatient(data.data.patientId, payload.name, payload.phone);
-                    }, 400);
-                }
-                form.reset();
-                forceSyncDatabase(); 
-            } else { showToast(data.message, "error"); }
+            if(data.success) { showToast("Patient Added Successfully!", "success"); closeModal('newPatientModal'); if (actionType === 'save_book' && data.data && data.data.patientId) setTimeout(() => { openModal('bookApptModal'); selectPatient(data.data.patientId, payload.name, payload.phone); }, 400); form.reset(); forceSyncDatabase(); } 
+            else showToast(data.message, "error");
         } catch(err) { showToast("Connection failed.", "error"); } 
-        finally {
-            btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText;
-            btnSave.disabled = false; btnSaveBook.disabled = false;
-        }
+        finally { btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText; btnSave.disabled = false; btnSaveBook.disabled = false; }
     }
 
     let searchTimeout;
-    function searchPatientDebounce() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(searchPatient, 500);
-    }
+    function searchPatientDebounce() { clearTimeout(searchTimeout); searchTimeout = setTimeout(searchPatient, 500); }
 
     async function searchPatient() {
-        const query = document.getElementById('baSearch').value;
-        const resBox = document.getElementById('searchResults');
+        const query = document.getElementById('baSearch').value; const resBox = document.getElementById('searchResults');
         if (query.length < 2) { resBox.classList.add('hidden'); return; }
-
-        if(!GAS_WEB_APP_URL) {
-            resBox.innerHTML = `<div onclick="selectPatient('NCC-999', 'Mock Patient Name', '9876543210')" class="p-4 border-b border-appBorder hover:bg-black/10 transition cursor-pointer"><p class="font-bold text-sm text-textMain">Mock Patient Name</p><p class="text-xs text-textMuted">NCC-999 • ${query}</p></div>`;
-            resBox.classList.remove('hidden');
-            return;
-        }
-
+        if(!GAS_WEB_APP_URL) { resBox.innerHTML = `<div onclick="selectPatient('NCC-999', 'Mock Patient Name', '9876543210')" class="p-4 border-b border-appBorder hover:bg-black/10 transition cursor-pointer"><p class="font-bold text-sm text-textMain">Mock Patient Name</p><p class="text-xs text-textMuted">NCC-999 • ${query}</p></div>`; resBox.classList.remove('hidden'); return; }
         try {
-            resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted"><i class="ph ph-spinner-gap animate-spin"></i> Searching...</div>`;
-            resBox.classList.remove('hidden');
-
+            resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted"><i class="ph ph-spinner-gap animate-spin"></i> Searching...</div>`; resBox.classList.remove('hidden');
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'searchPatient', query: query }) });
             const data = await res.json();
-            
-            if (data.success && data.data.length > 0) {
-                resBox.innerHTML = data.data.map(p => `
-                    <div onclick="selectPatient('${p.patientId}', '${p.name}', '${p.phone}')" class="p-4 border-b border-appBorder hover:bg-black/10 cursor-pointer transition">
-                        <p class="font-bold text-sm text-textMain">${p.name}</p>
-                        <p class="text-xs text-textMuted">${p.patientId} • ${p.phone}</p>
-                    </div>
-                `).join('');
-            } else { resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted">No patients found.</div>`; }
+            if (data.success && data.data.length > 0) resBox.innerHTML = data.data.map(p => `<div onclick="selectPatient('${p.patientId}', '${p.name}', '${p.phone}')" class="p-4 border-b border-appBorder hover:bg-black/10 cursor-pointer transition"><p class="font-bold text-sm text-textMain">${p.name}</p><p class="text-xs text-textMuted">${p.patientId} • ${p.phone}</p></div>`).join('');
+            else resBox.innerHTML = `<div class="p-4 text-center text-xs text-textMuted">No patients found.</div>`;
         } catch(e) { resBox.innerHTML = `<div class="p-4 text-center text-xs text-red-400">Search failed.</div>`; }
     }
 
     let currentBookingPhone = "";
     function selectPatient(id, name, phone) {
-        document.getElementById('baPatientId').value = id;
-        document.getElementById('selPatName').innerText = name;
-        document.getElementById('selPatId').innerText = id;
-        currentBookingPhone = phone || "";
-        
-        document.getElementById('baSearch').parentElement.classList.add('hidden');
-        document.getElementById('searchResults').classList.add('hidden');
-        document.getElementById('selectedPatientCard').classList.remove('hidden');
-        document.getElementById('editPatientInfoDiv').classList.add('hidden');
+        document.getElementById('baPatientId').value = id; document.getElementById('selPatName').innerText = name; document.getElementById('selPatId').innerText = id;
+        currentBookingPhone = phone || ""; document.getElementById('baSearch').parentElement.classList.add('hidden'); document.getElementById('searchResults').classList.add('hidden'); document.getElementById('selectedPatientCard').classList.remove('hidden'); document.getElementById('editPatientInfoDiv').classList.add('hidden');
     }
 
     function clearSelectedPatient() {
-        document.getElementById('baPatientId').value = '';
-        document.getElementById('selectedPatientCard').classList.add('hidden');
-        document.getElementById('baSearch').parentElement.classList.remove('hidden');
-        document.getElementById('baSearch').value = '';
-        document.getElementById('editPatientInfoDiv').classList.add('hidden');
-        currentBookingPhone = "";
+        document.getElementById('baPatientId').value = ''; document.getElementById('selectedPatientCard').classList.add('hidden'); document.getElementById('baSearch').parentElement.classList.remove('hidden'); document.getElementById('baSearch').value = ''; document.getElementById('editPatientInfoDiv').classList.add('hidden'); currentBookingPhone = "";
     }
 
     async function submitBooking(e) {
         e.preventDefault();
-        const pId = document.getElementById('baPatientId').value;
-        const pName = document.getElementById('selPatName').innerText;
-        const date = document.getElementById('baDate').value;
-        const time = document.getElementById('baTime').value;
-
+        const pId = document.getElementById('baPatientId').value; const pName = document.getElementById('selPatName').innerText; const date = document.getElementById('baDate').value; const time = document.getElementById('baTime').value;
         if(!pId) { showToast("Please search and select a patient first.", "error"); return; }
-
-        const btn = document.getElementById('btnSubmitBooking');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Booking...`;
-        btn.disabled = true;
-
-        if(!GAS_WEB_APP_URL) {
-            setTimeout(() => {
-                showBookingSuccess(pName, date, time, "99", currentBookingPhone);
-                clearSelectedPatient();
-                fetchQueueData(); 
-                btn.innerHTML = originalText; btn.disabled = false;
-            }, 1000);
-            return;
-        }
+        const btn = document.getElementById('btnSubmitBooking'); const originalText = btn.innerHTML;
+        btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Booking...`; btn.disabled = true;
 
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({action: 'bookAppointment', patientId: pId, date: date, timeSlot: time}) });
             const data = await res.json();
-            if(data.success) {
-                showBookingSuccess(pName, date, time, data.data.tokenNo, currentBookingPhone);
-                clearSelectedPatient();
-                fetchQueueData(); 
-            } else { showToast(data.message, "error"); }
+            if(data.success) { showBookingSuccess(pName, date, time, data.data.tokenNo, currentBookingPhone); clearSelectedPatient(); fetchQueueData(); } 
+            else { showToast(data.message, "error"); } // Godmode Fix 2: UI catches double booking error from backend
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally { btn.innerHTML = originalText; btn.disabled = false; }
     }
 
     // ==========================================
-    // PRESCRIPTION ENGINE LOGIC
+    // PRESCRIPTION ENGINE & OFFLINE OUTBOX
     // ==========================================
     async function fetchRemedyMaster() {
-        if (!GAS_WEB_APP_URL) {
-            masterRemedyList = [
-                {id: 'RM01', name: 'Triphala Churna', category: 'Herb', dose: '1 tsp', timing: 'Night, warm water'},
-                {id: 'RM02', name: 'Ashwagandha', category: 'Herb', dose: '500mg', timing: 'Morning after breakfast'},
-                {id: 'RM03', name: 'Hot Foot Bath', category: 'Therapy', dose: '15 mins', timing: 'Evening'},
-                {id: 'RM04', name: 'Intermittent Fasting (16:8)', category: 'Diet', dose: '-', timing: 'Skip breakfast'},
-                {id: 'RM05', name: 'Kapalbhati Pranayama', category: 'Yoga', dose: '10 mins', timing: 'Empty stomach morning'}
-            ];
-            return;
-        }
-        try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getRemedyMaster' }) });
-            const data = await res.json();
-            if(data.success) { masterRemedyList = data.data; }
-        } catch (e) {}
+        if (!GAS_WEB_APP_URL) return;
+        try { const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getRemedyMaster' }) }); const data = await res.json(); if(data.success) masterRemedyList = data.data; } catch (e) {}
     }
 
     async function fetchTemplates() {
-        if (!GAS_WEB_APP_URL) {
-            masterTemplateList = [
-                {id: 'TPL01', name: 'Acidity / GERD Protocol', remedyIds: ['RM01', 'RM04']},
-                {id: 'TPL02', name: 'Weight Loss & Detox', remedyIds: ['RM03', 'RM04', 'RM05']},
-                {id: 'TPL03', name: 'Insomnia & Stress', remedyIds: ['RM02', 'RM03', 'RM05']}
-            ];
-            return;
-        }
-        try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getTemplates' }) });
-            const data = await res.json();
-            if(data.success) { masterTemplateList = data.data; }
-        } catch (e) {}
+        if (!GAS_WEB_APP_URL) return;
+        try { const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getTemplates' }) }); const data = await res.json(); if(data.success) masterTemplateList = data.data; } catch (e) {}
     }
 
-    // GODMODE: Auto Draft System
     function saveDraft() {
         if(!currentActiveConsult) return;
-        const draft = {
-            complaint: document.getElementById('consultComplaint').value,
-            notes: document.getElementById('consultNotes').value,
-            protocol: activeProtocol
-        };
+        const draft = { complaint: document.getElementById('consultComplaint').value, notes: document.getElementById('consultNotes').value, protocol: activeProtocol };
         localStorage.setItem('rxDraft_' + currentActiveConsult.patientId, JSON.stringify(draft));
     }
     
     function loadDraft(pId) {
         const saved = localStorage.getItem('rxDraft_' + pId);
         if(saved) {
-            const draft = JSON.parse(saved);
-            document.getElementById('consultComplaint').value = draft.complaint || '';
-            document.getElementById('consultNotes').value = draft.notes || '';
-            activeProtocol = draft.protocol || [];
-            
-            // Show alert
-            const alert = document.getElementById('draftAlert');
-            alert.classList.remove('hidden');
-            setTimeout(() => alert.classList.add('hidden'), 4000);
+            const draft = JSON.parse(saved); document.getElementById('consultComplaint').value = draft.complaint || ''; document.getElementById('consultNotes').value = draft.notes || ''; activeProtocol = draft.protocol || [];
+            const alert = document.getElementById('draftAlert'); alert.classList.remove('hidden'); setTimeout(() => alert.classList.add('hidden'), 4000);
             return true;
         }
         return false;
     }
-
-    function clearDraft(pId) {
-        localStorage.removeItem('rxDraft_' + pId);
-    }
+    function clearDraft(pId) { localStorage.removeItem('rxDraft_' + pId); }
 
     function openConsultationRoom(patientData) {
-        currentActiveConsult = patientData;
-        editPrescriptionModeId = null; // reset edit mode
-        
-        document.getElementById('consultPatName').innerText = patientData.patientName;
-        document.getElementById('consultPatId').innerText = `ID: ${patientData.patientId}`;
-        document.getElementById('consultToken').innerText = `Token #${patientData.tokenNo}`;
-        
-        document.getElementById('consultHeaderTag').innerText = "Active Consult";
-        document.getElementById('consultHeaderTag').className = "text-xs font-black tracking-widest uppercase bg-accentConsult/10 text-accentConsult px-4 py-1.5 rounded-full border border-accentConsult/30";
-        document.getElementById('btnFinalizeText').innerText = "Send Prescription";
-        document.getElementById('consultFollowUp').value = "0";
-
-        // Auto Draft loader
-        if(!loadDraft(patientData.patientId)) {
-            document.getElementById('consultComplaint').value = '';
-            document.getElementById('consultNotes').value = '';
-            activeProtocol = [];
-        }
-        
+        currentActiveConsult = patientData; editPrescriptionModeId = null; 
+        document.getElementById('consultPatName').innerText = patientData.patientName; document.getElementById('consultPatId').innerText = `ID: ${patientData.patientId}`; document.getElementById('consultToken').innerText = `Token #${patientData.tokenNo}`;
+        document.getElementById('consultHeaderTag').innerText = "Active Consult"; document.getElementById('consultHeaderTag').className = "text-xs font-black tracking-widest uppercase bg-accentConsult/10 text-accentConsult px-4 py-1.5 rounded-full border border-accentConsult/30";
+        document.getElementById('btnFinalizeText').innerText = "Send Prescription"; document.getElementById('consultFollowUp').value = "0";
+        if(!loadDraft(patientData.patientId)) { document.getElementById('consultComplaint').value = ''; document.getElementById('consultNotes').value = ''; activeProtocol = []; }
         renderActiveProtocol();
-        const room = document.getElementById('consultationRoom');
-        document.body.style.overflow = 'hidden'; 
-        room.classList.remove('slide-up-hidden');
-        room.classList.add('slide-up-active');
+        const room = document.getElementById('consultationRoom'); document.body.style.overflow = 'hidden'; room.classList.remove('slide-up-hidden'); room.classList.add('slide-up-active');
     }
 
-    // GODMODE: Edit Prescription Handler
     function editPastPrescription(consultId, pId, pName, dateStr, complaint, protocolStr, notes) {
-        currentActiveConsult = { patientId: pId, patientName: pName, tokenNo: 'Edit' };
-        editPrescriptionModeId = consultId;
-        
-        document.getElementById('consultPatName').innerText = pName;
-        document.getElementById('consultPatId').innerText = `ID: ${pId}`;
-        document.getElementById('consultToken').innerText = `Date: ${dateStr}`;
-        
-        document.getElementById('consultHeaderTag').innerText = "Editing Rx";
-        document.getElementById('consultHeaderTag').className = "text-xs font-black tracking-widest uppercase bg-cardWaiting text-[#0B1120] px-4 py-1.5 rounded-full shadow-sm";
-        document.getElementById('btnFinalizeText').innerText = "Update & Resend";
-        document.getElementById('consultFollowUp').value = "0";
-
-        document.getElementById('consultComplaint').value = complaint;
-        document.getElementById('consultNotes').value = notes;
+        currentActiveConsult = { patientId: pId, patientName: pName, tokenNo: 'Edit' }; editPrescriptionModeId = consultId;
+        document.getElementById('consultPatName').innerText = pName; document.getElementById('consultPatId').innerText = `ID: ${pId}`; document.getElementById('consultToken').innerText = `Date: ${dateStr}`;
+        document.getElementById('consultHeaderTag').innerText = "Editing Rx"; document.getElementById('consultHeaderTag').className = "text-xs font-black tracking-widest uppercase bg-cardWaiting text-[#0B1120] px-4 py-1.5 rounded-full shadow-sm";
+        document.getElementById('btnFinalizeText').innerText = "Update & Resend"; document.getElementById('consultFollowUp').value = "0";
+        document.getElementById('consultComplaint').value = complaint; document.getElementById('consultNotes').value = notes;
         try { activeProtocol = JSON.parse(decodeURIComponent(protocolStr)); } catch(e){ activeProtocol = []; }
-        
-        renderActiveProtocol();
-        closeHistoryModal();
-        
-        const room = document.getElementById('consultationRoom');
-        document.body.style.overflow = 'hidden'; 
-        room.classList.remove('slide-up-hidden');
-        room.classList.add('slide-up-active');
+        renderActiveProtocol(); closeHistoryModal();
+        const room = document.getElementById('consultationRoom'); document.body.style.overflow = 'hidden'; room.classList.remove('slide-up-hidden'); room.classList.add('slide-up-active');
     }
 
     function closeConsultationRoom() {
-        const room = document.getElementById('consultationRoom');
-        room.classList.remove('slide-up-active');
-        room.classList.add('slide-up-hidden');
-        document.body.style.overflow = ''; 
-        currentActiveConsult = null;
-        editPrescriptionModeId = null;
+        const room = document.getElementById('consultationRoom'); room.classList.remove('slide-up-active'); room.classList.add('slide-up-hidden');
+        document.body.style.overflow = ''; currentActiveConsult = null; editPrescriptionModeId = null;
     }
 
-    function openRemedySearch() {
-        tempProtocol = JSON.parse(JSON.stringify(activeProtocol));
-        openModal('remedyModal');
-        document.getElementById('rmSearch').value = '';
-        setCategoryFilter('All');
-        filterRemedies(); 
-        document.getElementById('rmSearch').focus();
-        updateAddTreatmentButton();
-    }
-    
+    function openRemedySearch() { tempProtocol = JSON.parse(JSON.stringify(activeProtocol)); openModal('remedyModal'); document.getElementById('rmSearch').value = ''; setCategoryFilter('All'); filterRemedies(); document.getElementById('rmSearch').focus(); updateAddTreatmentButton(); }
     function closeRemedySearch() { closeModal('remedyModal'); }
-
-    function openCustomRemedyModal() {
-        openModal('customRemedyModal');
-        document.getElementById('crName').value = document.getElementById('rmSearch').value;
-        document.getElementById('crDose').value = '';
-        document.getElementById('crTiming').value = '';
-    }
-
+    function openCustomRemedyModal() { openModal('customRemedyModal'); document.getElementById('crName').value = document.getElementById('rmSearch').value; document.getElementById('crDose').value = ''; document.getElementById('crTiming').value = ''; }
     function addCustomRemedy() {
-        const name = document.getElementById('crName').value.trim();
-        if(!name) { showToast("Please enter a remedy name", "error"); return; }
-        const customItem = { id: 'CUST-' + Date.now(), name: name, category: document.getElementById('crCategory').value, dose: document.getElementById('crDose').value, timing: document.getElementById('crTiming').value };
-        tempProtocol.push(customItem);
-        closeModal('customRemedyModal');
-        filterRemedies();
-        updateAddTreatmentButton();
-        showToast("Custom remedy added to list!");
+        const name = document.getElementById('crName').value.trim(); if(!name) { showToast("Please enter a remedy name", "error"); return; }
+        tempProtocol.push({ id: 'CUST-' + Date.now(), name: name, category: document.getElementById('crCategory').value, dose: document.getElementById('crDose').value, timing: document.getElementById('crTiming').value });
+        closeModal('customRemedyModal'); filterRemedies(); updateAddTreatmentButton(); showToast("Custom remedy added to list!");
     }
-
     function openTemplateModal() { openModal('templateModal'); document.getElementById('tplSearch').value = ''; filterTemplates(); }
     function closeTemplateModal() { closeModal('templateModal'); }
-
     function filterTemplates() {
-        const query = document.getElementById('tplSearch').value.toLowerCase();
-        const listDiv = document.getElementById('templateList');
+        const query = document.getElementById('tplSearch').value.toLowerCase(); const listDiv = document.getElementById('templateList');
         let filtered = masterTemplateList.filter(t => t.name.toLowerCase().includes(query));
         if (filtered.length === 0) { listDiv.innerHTML = `<div class="p-6 text-center text-sm text-textMuted">No templates found.</div>`; return; }
-        listDiv.innerHTML = filtered.map(t => `
-            <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="applyTemplate('${t.id}')">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-accentConsult/10 flex items-center justify-center text-accentConsult shrink-0"><i class="ph-fill ph-magic-wand text-xl"></i></div>
-                    <div><p class="font-bold text-sm text-textMain">${t.name}</p><p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${t.remedyIds.length} ITEMS</p></div>
-                </div>
-                <div><i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-textMain"></i></div>
-            </div>
-        `).join('');
+        listDiv.innerHTML = filtered.map(t => `<div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="applyTemplate('${t.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-accentConsult/10 flex items-center justify-center text-accentConsult shrink-0"><i class="ph-fill ph-magic-wand text-xl"></i></div><div><p class="font-bold text-sm text-textMain">${t.name}</p><p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${t.remedyIds.length} ITEMS</p></div></div><div><i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-textMain"></i></div></div>`).join('');
     }
-
     function applyTemplate(templateId) {
-        const template = masterTemplateList.find(t => t.id === templateId);
-        if (!template) return;
+        const template = masterTemplateList.find(t => t.id === templateId); if (!template) return;
         let addedCount = 0;
-        template.remedyIds.forEach(rId => {
-            if (!activeProtocol.some(p => p.id === rId)) {
-                const remedy = masterRemedyList.find(r => r.id === rId);
-                if (remedy) { activeProtocol.push(JSON.parse(JSON.stringify(remedy))); addedCount++; }
-            }
-        });
-        closeTemplateModal();
-        renderActiveProtocol();
-        if (addedCount > 0) { showToast(`${addedCount} items added from template!`, "success"); } 
-        else { showToast("All items from this template are already in your protocol.", "error"); }
+        template.remedyIds.forEach(rId => { if (!activeProtocol.some(p => p.id === rId)) { const remedy = masterRemedyList.find(r => r.id === rId); if (remedy) { activeProtocol.push(JSON.parse(JSON.stringify(remedy))); addedCount++; } } });
+        closeTemplateModal(); renderActiveProtocol();
+        if (addedCount > 0) showToast(`${addedCount} items added from template!`, "success"); else showToast("All items from this template are already in your protocol.", "error");
     }
-
     function setCategoryFilter(category) {
         activeCategoryFilter = category;
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.className = btn.innerText === category ? "category-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-textMain text-appBg shrink-0 transition border border-transparent" : "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition hover:text-textMain";
-        });
+        document.querySelectorAll('.category-btn').forEach(btn => { btn.className = btn.innerText === category ? "category-btn active px-4 py-1.5 rounded-full text-xs font-bold bg-textMain text-appBg shrink-0 transition border border-transparent" : "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-pillDark text-textMuted border border-appBorder shrink-0 transition hover:text-textMain"; });
         filterRemedies();
     }
-
     function filterRemedies() {
-        const query = document.getElementById('rmSearch').value.toLowerCase();
-        const listDiv = document.getElementById('remedyResultsList');
+        const query = document.getElementById('rmSearch').value.toLowerCase(); const listDiv = document.getElementById('remedyResultsList');
         let filtered = masterRemedyList.filter(r => (r.name.toLowerCase().includes(query) || r.category.toLowerCase().includes(query)) && (activeCategoryFilter === 'All' || r.category === activeCategoryFilter));
         if (filtered.length === 0) { listDiv.innerHTML = `<div class="p-6 text-center text-sm text-textMuted">No matches found in database. <br>Use the button below to add a custom remedy.</div>`; return; }
         listDiv.innerHTML = filtered.map(r => {
-            const isAdded = tempProtocol.some(p => p.id === r.id);
-            let catIcon = r.category === 'Diet' ? 'ph-bowl-food' : r.category === 'Yoga' ? 'ph-person-simple-meditate' : r.category === 'Therapy' ? 'ph-drop' : 'ph-leaf';
-            return `
-                <div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="toggleRemedy('${r.id}')">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-textMuted/10 flex items-center justify-center text-textMuted shrink-0"><i class="ph-fill ${catIcon} text-xl"></i></div>
-                        <div><p class="font-bold text-sm text-textMain">${r.name}</p><p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${r.category}</p></div>
-                    </div>
-                    <div>${isAdded ? `<i class="ph-fill ph-check-circle text-2xl text-accentDone"></i>` : `<i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-textMain"></i>`}</div>
-                </div>
-            `;
+            const isAdded = tempProtocol.some(p => p.id === r.id); let catIcon = r.category === 'Diet' ? 'ph-bowl-food' : r.category === 'Yoga' ? 'ph-person-simple-meditate' : r.category === 'Therapy' ? 'ph-drop' : 'ph-leaf';
+            return `<div class="p-4 bg-pillDark border border-appBorder rounded-2xl flex justify-between items-center hover:border-textMuted/50 transition cursor-pointer" onclick="toggleRemedy('${r.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-textMuted/10 flex items-center justify-center text-textMuted shrink-0"><i class="ph-fill ${catIcon} text-xl"></i></div><div><p class="font-bold text-sm text-textMain">${r.name}</p><p class="text-[10px] font-semibold text-textMuted uppercase tracking-wider">${r.category}</p></div></div><div>${isAdded ? `<i class="ph-fill ph-check-circle text-2xl text-accentDone"></i>` : `<i class="ph-bold ph-plus-circle text-2xl text-textMuted/50 hover:text-textMain"></i>`}</div></div>`;
         }).join('');
     }
-
     function toggleRemedy(remedyId) {
-        const index = tempProtocol.findIndex(p => p.id === remedyId);
-        if (index > -1) tempProtocol.splice(index, 1);
-        else {
-            const remedy = masterRemedyList.find(r => r.id === remedyId);
-            if (remedy) tempProtocol.push(JSON.parse(JSON.stringify(remedy)));
-        }
-        filterRemedies();
-        updateAddTreatmentButton();
+        const index = tempProtocol.findIndex(p => p.id === remedyId); if (index > -1) tempProtocol.splice(index, 1); else { const remedy = masterRemedyList.find(r => r.id === remedyId); if (remedy) tempProtocol.push(JSON.parse(JSON.stringify(remedy))); }
+        filterRemedies(); updateAddTreatmentButton();
     }
-
     function updateAddTreatmentButton() {
         const btnContainer = document.getElementById('addTreatmentBtnContainer');
-        if (tempProtocol.length > 0) {
-            btnContainer.classList.remove('hidden');
-            document.getElementById('addTreatmentBtnSpan').innerText = `Add ${tempProtocol.length} Item${tempProtocol.length > 1 ? 's' : ''} to Treatment`;
-        } else { btnContainer.classList.add('hidden'); }
+        if (tempProtocol.length > 0) { btnContainer.classList.remove('hidden'); document.getElementById('addTreatmentBtnSpan').innerText = `Add ${tempProtocol.length} Item${tempProtocol.length > 1 ? 's' : ''} to Treatment`; } else btnContainer.classList.add('hidden');
     }
-
-    function commitTreatment() {
-        activeProtocol = JSON.parse(JSON.stringify(tempProtocol));
-        closeRemedySearch();
-        renderActiveProtocol();
-        saveDraft(); // Save draft after adding
-    }
-
+    function commitTreatment() { activeProtocol = JSON.parse(JSON.stringify(tempProtocol)); closeRemedySearch(); renderActiveProtocol(); saveDraft(); }
     function renderActiveProtocol() {
-        const listDiv = document.getElementById('protocolList');
-        const emptyState = document.getElementById('emptyProtocolState');
+        const listDiv = document.getElementById('protocolList'); const emptyState = document.getElementById('emptyProtocolState');
         if (activeProtocol.length === 0) { listDiv.innerHTML = ''; listDiv.appendChild(emptyState); emptyState.style.display = 'flex'; return; }
         emptyState.style.display = 'none';
-        let html = '';
-        activeProtocol.forEach((item, index) => {
-            html += `
-                <div class="bg-pillDark border border-appBorder rounded-[20px] p-4 relative overflow-hidden group">
-                    <div class="absolute left-0 top-0 bottom-0 w-1.5 ${item.category === 'Diet' ? 'bg-cardWaiting' : item.category === 'Yoga' ? 'bg-cardConsult' : 'bg-cardDone'}"></div>
-                    <div class="flex justify-between items-start pl-2">
-                        <div class="flex-1">
-                            <h4 class="font-bold text-sm text-textMain mb-1">${item.name}</h4>
-                            <div class="flex flex-col gap-2 mt-2 mr-2">
-                                <div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5 transition-colors">
-                                    <i class="ph-fill ph-pill text-textMuted mr-2"></i>
-                                    <input type="text" value="${item.dose}" onchange="updateProtocolItem(${index}, 'dose', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Dose (e.g. 1 tsp)">
-                                </div>
-                                <div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5 transition-colors">
-                                    <i class="ph-fill ph-clock text-textMuted mr-2"></i>
-                                    <input type="text" value="${item.timing}" onchange="updateProtocolItem(${index}, 'timing', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Timing">
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="removeProtocolItem(${index})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition shrink-0"><i class="ph-bold ph-trash"></i></button>
-                    </div>
-                </div>
-            `;
-        });
-        listDiv.innerHTML = html;
+        listDiv.innerHTML = activeProtocol.map((item, index) => `<div class="bg-pillDark border border-appBorder rounded-[20px] p-4 relative overflow-hidden group"><div class="absolute left-0 top-0 bottom-0 w-1.5 ${item.category === 'Diet' ? 'bg-cardWaiting' : item.category === 'Yoga' ? 'bg-cardConsult' : 'bg-cardDone'}"></div><div class="flex justify-between items-start pl-2"><div class="flex-1"><h4 class="font-bold text-sm text-textMain mb-1">${item.name}</h4><div class="flex flex-col gap-2 mt-2 mr-2"><div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5 transition-colors"><i class="ph-fill ph-pill text-textMuted mr-2"></i><input type="text" value="${item.dose}" onchange="updateProtocolItem(${index}, 'dose', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Dose (e.g. 1 tsp)"></div><div class="flex items-center bg-appBg/50 border border-appBorder rounded-lg px-3 py-1.5 transition-colors"><i class="ph-fill ph-clock text-textMuted mr-2"></i><input type="text" value="${item.timing}" onchange="updateProtocolItem(${index}, 'timing', this.value)" class="bg-transparent border-none text-xs w-full focus:ring-0 p-0 text-textMain" placeholder="Timing"></div></div></div><button onclick="removeProtocolItem(${index})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition shrink-0"><i class="ph-bold ph-trash"></i></button></div></div>`).join('');
         listDiv.appendChild(emptyState); 
     }
-
     function updateProtocolItem(index, field, value) { activeProtocol[index][field] = value; saveDraft(); }
     function removeProtocolItem(index) { activeProtocol.splice(index, 1); renderActiveProtocol(); saveDraft(); }
 
+    // GODMODE FIX 5: Offline Outbox Sync Listener
+    window.addEventListener('online', syncOutbox);
+    
+    async function syncOutbox() {
+        if (rxOutbox.length === 0) return;
+        showToast("Syncing offline prescriptions...", "success");
+        let toSync = [...rxOutbox];
+        rxOutbox = [];
+        localStorage.setItem('rxOutbox', JSON.stringify(rxOutbox));
+        
+        for (let payload of toSync) {
+            try { await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) }); } 
+            catch(e) { rxOutbox.push(payload); } // Push back if still failing
+        }
+        localStorage.setItem('rxOutbox', JSON.stringify(rxOutbox));
+        fetchQueueData();
+    }
+
     async function finalizeConsultation() {
         if (activeProtocol.length === 0) { showToast("Please add at least one item to the protocol.", "error"); return; }
-        const btn = document.getElementById('btnFinalize');
-        const origBtnText = document.getElementById('btnFinalizeText').innerText;
+        const btn = document.getElementById('btnFinalize'); const origBtnText = document.getElementById('btnFinalizeText').innerText;
         btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Saving...`; btn.disabled = true;
         
         const payload = { 
             action: editPrescriptionModeId ? 'editPrescription' : 'savePrescription', 
-            consultId: editPrescriptionModeId, // Only used if editing
-            patientId: currentActiveConsult.patientId, 
-            tokenNo: currentActiveConsult.tokenNo, 
-            date: selectedDate.toISOString().split('T')[0], 
-            complaint: document.getElementById('consultComplaint').value, 
-            notes: document.getElementById('consultNotes').value, 
-            protocol: activeProtocol,
-            followUpDays: document.getElementById('consultFollowUp').value // Godmode
+            consultId: editPrescriptionModeId, patientId: currentActiveConsult.patientId, tokenNo: currentActiveConsult.tokenNo, 
+            date: selectedDate.toISOString().split('T')[0], complaint: document.getElementById('consultComplaint').value, 
+            notes: document.getElementById('consultNotes').value, protocol: activeProtocol, followUpDays: document.getElementById('consultFollowUp').value 
         };
 
-        if(!GAS_WEB_APP_URL) {
+        // GODMODE FIX 5: Save to Outbox if Offline
+        if (!navigator.onLine) {
+            rxOutbox.push(payload);
+            localStorage.setItem('rxOutbox', JSON.stringify(rxOutbox));
+            showToast("Saved to Outbox (Offline)", "warning");
+            
+            btn.innerHTML = `<i class="ph-bold ph-wifi-slash"></i> Saved to Outbox`;
+            btn.classList.add('bg-orange-400', 'text-white'); btn.classList.remove('bg-cardDone', 'text-[#0B1120]');
+            
             setTimeout(() => {
-                showToast(editPrescriptionModeId ? "Prescription Updated!" : "Prescription Saved!", "success");
-                clearDraft(currentActiveConsult.patientId); // clear draft on success
-                closeConsultationRoom();
-                const item = currentQueueData.find(q => q.tokenNo === currentActiveConsult.tokenNo);
-                if(item) item.status = "Done";
-                renderQueue();
-                btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> <span id="btnFinalizeText">Send Prescription</span>`; btn.disabled = false;
-                
-                let title = editPrescriptionModeId ? "Updated Prescription Sent!" : "Prescription Sent!";
-                showPrescriptionSuccess(title, currentActiveConsult.patientName, "9876543210", activeProtocol);
-            }, 1000);
+                clearDraft(currentActiveConsult.patientId); closeConsultationRoom();
+                const item = currentQueueData.find(q => q.tokenNo === currentActiveConsult.tokenNo); if(item) item.status = "Done"; renderQueue();
+                btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> <span id="btnFinalizeText">${origBtnText}</span>`;
+                btn.classList.remove('bg-orange-400', 'text-white'); btn.classList.add('bg-cardDone', 'text-[#0B1120]');
+                btn.disabled = false;
+            }, 1500);
             return;
         }
 
@@ -1989,16 +1633,12 @@
             const data = await res.json();
             if(data.success) { 
                 showToast(editPrescriptionModeId ? "Prescription Updated & Sent!" : "Prescription Saved & Sent!", "success"); 
-                clearDraft(currentActiveConsult.patientId); // clear draft on success
-                closeConsultationRoom(); 
-                fetchQueueData(); 
-                
+                clearDraft(currentActiveConsult.patientId); closeConsultationRoom(); fetchQueueData(); 
                 const pName = (data.data && data.data.name) ? data.data.name : currentActiveConsult.patientName;
                 const pPhone = (data.data && data.data.phone) ? data.data.phone : "9100000000"; 
                 let title = editPrescriptionModeId ? "Updated Prescription Sent!" : "Prescription Sent!";
                 showPrescriptionSuccess(title, pName, pPhone, activeProtocol);
-            } 
-            else { showToast(data.message, "error"); }
+            } else showToast(data.message, "error"); 
         } catch(err) { showToast("Connection failed.", "error"); } 
         finally { btn.innerHTML = `<i class="ph-bold ph-paper-plane-tilt"></i> <span id="btnFinalizeText">${origBtnText}</span>`; btn.disabled = false; }
     }
@@ -2006,148 +1646,89 @@
     // Prescription Success Handlers
     function generateHerbReminderLink() {
         try {
+            let startDt = new Date(); startDt.setDate(startDt.getDate() + 1); startDt.setHours(8, 0, 0); let endDt = new Date(startDt.getTime() + 15*60000); 
             const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
-            let startDt = new Date();
-            startDt.setDate(startDt.getDate() + 1); 
-            startDt.setHours(8, 0, 0); 
-            let endDt = new Date(startDt.getTime() + 15*60000); 
-            
             return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Time+for+Naturopathy+Herbs%F0%9F%8C%BF&dates=${fmt(startDt)}/${fmt(endDt)}&details=Daily+reminder+to+take+your+herbs+prescribed+by+Dr.+Pise.`;
-        } catch(e) {
-            return "https://calendar.google.com/";
-        }
+        } catch(e) { return "https://calendar.google.com/"; }
     }
 
     function showPrescriptionSuccess(modalTitle, patientName, patientPhone, protocolList) {
         document.getElementById('rxSuccessTitle').innerText = modalTitle;
         const calLink = generateHerbReminderLink();
-        
-        let protocolStr = "";
-        protocolList.forEach(item => {
-            protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`;
-        });
-
-        // BILINGUAL WHATSAPP MESSAGE
+        let protocolStr = ""; protocolList.forEach(item => protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`);
         const msg = `Namaste ${patientName} ji! 🌿\n\nYour consultation is complete.\n(आपका परामर्श पूरा हो गया है।)\n\nHere is your Treatment Protocol:\n(आपकी उपचार विधि:)\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar:\n(दवाइयाँ लेना ना भूलें, रिमाइंडर सेट करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
-
-        document.getElementById('rxWaMessageText').value = msg;
-        document.getElementById('rxWaMessageText').dataset.phone = patientPhone || '';
-        
+        document.getElementById('rxWaMessageText').value = msg; document.getElementById('rxWaMessageText').dataset.phone = patientPhone || '';
         openModal('prescriptionSuccessModal');
     }
 
-    function copyRxWaMessage() {
-        const msg = document.getElementById('rxWaMessageText').value;
-        navigator.clipboard.writeText(msg).then(() => showToast("Message Copied!"));
-    }
-
+    function copyRxWaMessage() { navigator.clipboard.writeText(document.getElementById('rxWaMessageText').value).then(() => showToast("Message Copied!")); }
     function sendRxWaMessage() {
-        const msg = encodeURIComponent(document.getElementById('rxWaMessageText').value);
-        let phone = document.getElementById('rxWaMessageText').dataset.phone;
-        phone = phone.replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone; 
+        const msg = encodeURIComponent(document.getElementById('rxWaMessageText').value); let phone = document.getElementById('rxWaMessageText').dataset.phone.replace(/\D/g, ''); if (phone.length === 10) phone = '91' + phone; 
         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     }
 
     async function openPatientHistory() {
         if(!currentActiveConsult) return;
-        const modal = document.getElementById('historyModal');
-        document.body.style.overflow = 'hidden'; 
-        modal.classList.remove('slide-up-hidden'); modal.classList.add('slide-up-active');
+        const modal = document.getElementById('historyModal'); document.body.style.overflow = 'hidden'; modal.classList.remove('slide-up-hidden'); modal.classList.add('slide-up-active');
         switchHistoryTab('consults', true); 
-        const contentArea = document.getElementById('historyContentArea');
-        contentArea.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading history...</p></div>`;
-
-        if(!GAS_WEB_APP_URL) {
-            setTimeout(() => {
-                currentHistoryData = { prescriptions: [{ consultId: 'C123', date: '2026-05-18', complaint: 'Mild fever, severe acidity', protocol: [{name: 'Triphala Churna', dose: '1 tsp', timing: 'Night'}], notes: 'Patient is recovering well.' }], reports: [{ date: '2026-03-15', label: 'Complete Blood Count', url: '#' }] };
-                renderHistoryTab();
-            }, 800);
-            return;
-        }
+        const contentArea = document.getElementById('historyContentArea'); contentArea.innerHTML = `<div class="text-center text-textMuted py-20"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading history...</p></div>`;
 
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getPatientHistory', patientId: currentActiveConsult.patientId }) });
             const data = await res.json();
-            if(data.success) { currentHistoryData = data.data; renderHistoryTab(); } 
-            else { contentArea.innerHTML = `<div class="text-center text-red-400 py-10">${data.message}</div>`; }
+            if(data.success) { currentHistoryData = data.data; renderHistoryTab(); } else contentArea.innerHTML = `<div class="text-center text-red-400 py-10">${data.message}</div>`;
         } catch(e) { contentArea.innerHTML = `<div class="text-center text-red-400 py-10">Connection failed.</div>`; }
     }
 
     function closeHistoryModal() {
-        const modal = document.getElementById('historyModal');
-        modal.classList.remove('slide-up-active'); modal.classList.add('slide-up-hidden');
+        const modal = document.getElementById('historyModal'); modal.classList.remove('slide-up-active'); modal.classList.add('slide-up-hidden');
         if(!document.getElementById('consultationRoom').classList.contains('slide-up-active')) document.body.style.overflow = '';
     }
 
     function switchHistoryTab(tab, skipRender = false) {
-        activeHistoryTab = tab;
-        const tabC = document.getElementById('tabConsults'); const tabR = document.getElementById('tabReports');
-        if(tab === 'consults') {
-            tabC.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm";
-            tabR.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain";
-        } else {
-            tabR.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm";
-            tabC.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain";
-        }
+        activeHistoryTab = tab; const tabC = document.getElementById('tabConsults'); const tabR = document.getElementById('tabReports');
+        if(tab === 'consults') { tabC.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm"; tabR.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain"; } 
+        else { tabR.className = "flex-1 py-2 text-sm font-bold bg-textMain text-appBg rounded-xl transition shadow-sm"; tabC.className = "flex-1 py-2 text-sm font-bold text-textMuted rounded-xl transition hover:text-textMain"; }
         if(!skipRender) renderHistoryTab();
     }
 
     function renderHistoryTab() {
-        const area = document.getElementById('historyContentArea');
-        area.innerHTML = '';
+        const area = document.getElementById('historyContentArea'); area.innerHTML = '';
         if (activeHistoryTab === 'consults') {
-            if (!currentHistoryData.prescriptions || currentHistoryData.prescriptions.length === 0) {
-                area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-folder-open text-3xl mb-2 opacity-50"></i><p>No past consultations found.</p></div>`; return;
-            }
+            if (!currentHistoryData.prescriptions || currentHistoryData.prescriptions.length === 0) { area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-folder-open text-3xl mb-2 opacity-50"></i><p>No past consultations found.</p></div>`; return; }
             currentHistoryData.prescriptions.forEach(p => {
-                let medsHtml = p.protocol.map(med => `
-                    <div class="flex justify-between items-center bg-inputBg p-3 rounded-xl border border-appBorder mb-2 transition-colors">
-                        <span class="text-sm font-bold text-textMain">${med.name}</span>
-                        <div class="text-right"><span class="text-xs font-semibold text-textMain block">${med.dose}</span><span class="text-[10px] text-textMuted">${med.timing}</span></div>
-                    </div>
-                `).join('');
-                
-                // Edit Logic (Godmode feature - Allow edit if within 24 hours approximately, here we just allow edit for all recent for simplicity)
-                const encodedProtocol = encodeURIComponent(JSON.stringify(p.protocol));
-                const escNotes = p.notes ? p.notes.replace(/'/g, "\\'") : '';
-                const escComp = p.complaint ? p.complaint.replace(/'/g, "\\'") : '';
-                
+                let medsHtml = p.protocol.map(med => `<div class="flex justify-between items-center bg-inputBg p-3 rounded-xl border border-appBorder mb-2 transition-colors"><span class="text-sm font-bold text-textMain">${med.name}</span><div class="text-right"><span class="text-xs font-semibold text-textMain block">${med.dose}</span><span class="text-[10px] text-textMuted">${med.timing}</span></div></div>`).join('');
+                const encodedProtocol = encodeURIComponent(JSON.stringify(p.protocol)); const escNotes = p.notes ? p.notes.replace(/'/g, "\\'") : ''; const escComp = p.complaint ? p.complaint.replace(/'/g, "\\'") : '';
                 let editBtnHtml = `<button onclick="editPastPrescription('${p.consultId}', '${currentActiveConsult.patientId}', '${currentActiveConsult.patientName}', '${p.date}', '${escComp}', '${encodedProtocol}', '${escNotes}')" class="absolute top-4 right-4 bg-appBg hover:bg-black/20 text-textMuted hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-appBorder shadow-sm"><i class="ph-bold ph-pencil-simple"></i></button>`;
-
-                area.innerHTML += `
-                    <div class="mb-6 relative pl-6">
-                        <div class="absolute left-0 top-1 w-3 h-3 bg-accentConsult rounded-full"></div>
-                        <div class="absolute left-1.5 top-4 bottom-[-24px] w-px bg-appBorder"></div>
-                        <h4 class="text-sm font-extrabold text-accentConsult mb-1">${p.date}</h4>
-                        <div class="bg-pillDark border border-appBorder p-4 rounded-2xl shadow-sm transition-colors relative">
-                            ${editBtnHtml}
-                            <p class="text-xs text-textMuted font-bold uppercase mb-1">Complaint</p>
-                            <p class="text-sm text-textMain mb-4 bg-inputBg p-3 rounded-xl transition-colors pr-10">${p.complaint || 'None recorded'}</p>
-                            <p class="text-xs text-textMuted font-bold uppercase mb-2">Protocol Prescribed</p>
-                            ${medsHtml}
-                            ${p.notes ? `<div class="mt-3 pt-3 border-t border-appBorder border-dashed"><p class="text-xs text-textMuted font-bold uppercase mb-1">Doctor Notes</p><p class="text-[11px] text-textMuted italic">${p.notes}</p></div>` : ''}
-                        </div>
-                    </div>
-                `;
+                area.innerHTML += `<div class="mb-6 relative pl-6"><div class="absolute left-0 top-1 w-3 h-3 bg-accentConsult rounded-full"></div><div class="absolute left-1.5 top-4 bottom-[-24px] w-px bg-appBorder"></div><h4 class="text-sm font-extrabold text-accentConsult mb-1">${p.date}</h4><div class="bg-pillDark border border-appBorder p-4 rounded-2xl shadow-sm transition-colors relative">${editBtnHtml}<p class="text-xs text-textMuted font-bold uppercase mb-1">Complaint</p><p class="text-sm text-textMain mb-4 bg-inputBg p-3 rounded-xl transition-colors pr-10">${p.complaint || 'None recorded'}</p><p class="text-xs text-textMuted font-bold uppercase mb-2">Protocol Prescribed</p>${medsHtml}${p.notes ? `<div class="mt-3 pt-3 border-t border-appBorder border-dashed"><p class="text-xs text-textMuted font-bold uppercase mb-1">Doctor Notes</p><p class="text-[11px] text-textMuted italic">${p.notes}</p></div>` : ''}</div></div>`;
             });
         } else {
-            if (!currentHistoryData.reports || currentHistoryData.reports.length === 0) {
-                area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-file-pdf text-3xl mb-2 opacity-50"></i><p>No lab reports uploaded.</p></div>`; return;
-            }
+            if (!currentHistoryData.reports || currentHistoryData.reports.length === 0) { area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-file-pdf text-3xl mb-2 opacity-50"></i><p>No lab reports uploaded.</p></div>`; return; }
             currentHistoryData.reports.forEach(r => {
-                area.innerHTML += `
-                    <div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ph-file-pdf text-2xl"></i></div>
-                            <div><p class="font-bold text-sm text-textMain">${r.label}</p><p class="text-[11px] font-semibold text-textMuted">${r.date}</p></div>
-                        </div>
-                        <a href="${r.url}" target="_blank" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition"><i class="ph-bold ph-download-simple"></i></a>
-                    </div>
-                `;
+                area.innerHTML += `<div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ph-file-pdf text-2xl"></i></div><div><p class="font-bold text-sm text-textMain">${r.label}</p><p class="text-[11px] font-semibold text-textMuted">${r.date}</p></div></div><button onclick="downloadReportFromHistory('${r.fileId}')" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition"><i class="ph-bold ph-download-simple"></i></button></div>`;
             });
         }
     }
+
+    async function downloadReportFromHistory(fileId) {
+        showToast("Fetching secure document...");
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'downloadReport', fileId: fileId }) });
+            const data = await res.json();
+            if(data.success) {
+                if(data.isHeavy) {
+                    window.open(data.url, '_blank');
+                    showToast("Opening viewer...");
+                } else {
+                    const a = document.createElement("a");
+                    a.href = `data:${data.mimeType};base64,${data.base64Data}`; a.download = data.fileName;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    showToast("Download started!");
+                }
+            } else { showToast(data.message, "error"); }
+        } catch(e) { showToast("Failed to download.", "error"); }
+    }
+
 </script>
 </body>
 </html>
