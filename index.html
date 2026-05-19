@@ -391,7 +391,7 @@
 <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw1OqkYJl2CikO7y5SJRE4k9n2k3kr7wMGTa9O_eVsAPE82wVL86QJhrogcxGe1Z9LZ/exec"; 
     
-    let selectedDate = new Date(); document.getElementById('baDate').value = selectedDate.toISOString().split('T')[0];
+    let selectedDate = new Date(); 
 
     let currentQueueData = []; let allPatientsDirectory = []; let masterRemedyList = []; let masterTemplateList = []; 
     let currentActiveConsult = null; let activeProtocol = []; let tempProtocol = []; let activeCategoryFilter = 'All';
@@ -430,7 +430,12 @@
     window.onload = () => { setTimeout(() => { document.getElementById('splashLogo').classList.remove('opacity-0', 'scale-50'); document.getElementById('splashText').classList.remove('opacity-0', 'translate-y-4'); document.getElementById('startBtn').classList.remove('opacity-0', 'translate-y-4'); }, 100); fetchSettings(); };
 
     document.addEventListener("DOMContentLoaded", async () => {
-        const todayStrLocal = new Date().toISOString().split('T')[0]; document.getElementById('baDate').min = todayStrLocal;
+        const baDateEl = document.getElementById('baDate');
+        if (baDateEl) {
+            baDateEl.value = selectedDate.toISOString().split('T')[0];
+            const todayStrLocal = new Date().toISOString().split('T')[0]; 
+            baDateEl.min = todayStrLocal;
+        }
         await initDB(); renderDateSelector(); fetchQueueData(); fetchRemedyMaster(); fetchTemplates(); fetchAllPatients(); fetchFollowUps(); 
     });
 
@@ -627,10 +632,11 @@
 
         const payload = { action: 'addPatient', name: document.getElementById('npName').value, phone: document.getElementById('npPhone').value, email: document.getElementById('npEmail').value, age: document.getElementById('npAge').value, gender: document.getElementById('npGender').value };
         try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) }); const data = await res.json();
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) }); const text = await res.text(); let data;
+            try { data = JSON.parse(text); } catch(e) { throw new Error("Server returned invalid response."); }
             if(data.success) { showToast("Patient Added Successfully!", "success"); closeModal('newPatientModal'); if (actionType === 'save_book' && data.data && data.data.patientId) setTimeout(() => { openModal('bookApptModal'); selectPatient(data.data.patientId, payload.name, payload.phone); }, 400); form.reset(); forceSyncDatabase(); } 
             else showToast(data.message, "error");
-        } catch(err) { showToast("Connection failed.", "error"); } 
+        } catch(err) { console.error(err); showToast("Connection failed. Try again.", "error"); } 
         finally { btnSave.innerHTML = originalSaveText; btnSaveBook.innerHTML = originalSaveBookText; btnSave.disabled = false; btnSaveBook.disabled = false; }
     }
 
@@ -664,9 +670,10 @@
 
         try {
             const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({action: 'bookAppointment', patientId: pId, date: date, timeSlot: time}) });
-            const data = await res.json();
+            const text = await res.text(); let data;
+            try { data = JSON.parse(text); } catch(err) { throw new Error("Server returned invalid response."); }
             if(data.success) { showBookingSuccess(pName, date, time, data.data.tokenNo, currentBookingPhone); clearSelectedPatient(); fetchQueueData(); } else { showToast(data.message, "error"); } 
-        } catch(err) { showToast("Connection failed.", "error"); } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        } catch(err) { console.error(err); showToast("Connection failed. Try again.", "error"); } finally { btn.innerHTML = originalText; btn.disabled = false; }
     }
 
     async function fetchRemedyMaster() { if (!GAS_WEB_APP_URL) return; try { const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getRemedyMaster' }) }); const data = await res.json(); if(data.success) masterRemedyList = data.data; } catch (e) {} }
@@ -781,24 +788,11 @@
     }
 
     function generateCalendarLink(dateStr, timeStr) {
-        try {
-            let [time, modifier] = timeStr.split(' '); let [hours, minutes] = time.split(':'); hours = parseInt(hours, 10);
-            if (modifier === 'PM' && hours < 12) hours += 12; if (modifier === 'AM' && hours === 12) hours = 0;
-            let startDt = new Date(dateStr); startDt.setHours(hours, parseInt(minutes), 0);
-            let endDt = new Date(startDt.getTime() + 30*60000);
-            const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
-            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`;
-        } catch(e) { return "https://calendar.google.com/"; }
+        try { let startDt = new Date(dateStr); let [time, mod] = timeStr.split(' '); let [h, m] = time.split(':'); h = parseInt(h); if(mod==='PM'&&h<12) h+=12; if(mod==='AM'&&h===12) h=0; startDt.setHours(h,parseInt(m),0); let endDt = new Date(startDt.getTime() + 30*60000); const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Dr.+Pise+Naturopathy+Appt&dates=${fmt(startDt)}/${fmt(endDt)}&details=Your+naturopathy+appointment+is+confirmed.`; } catch(e) { return "https://calendar.google.com/"; }
     }
-
     function generateHerbReminderLink() {
-        try {
-            let startDt = new Date(); startDt.setDate(startDt.getDate() + 1); startDt.setHours(8, 0, 0); let endDt = new Date(startDt.getTime() + 15*60000);
-            const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); 
-            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Time+for+Naturopathy+Herbs%F0%9F%8C%BF&dates=${fmt(startDt)}/${fmt(endDt)}&details=Daily+reminder+to+take+your+herbs+prescribed+by+Dr.+Pise.`;
-        } catch(e) { return "https://calendar.google.com/"; }
+        try { let startDt = new Date(); startDt.setDate(startDt.getDate() + 1); startDt.setHours(8, 0, 0); let endDt = new Date(startDt.getTime() + 15*60000); const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, ''); return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Time+for+Naturopathy+Herbs%F0%9F%8C%BF&dates=${fmt(startDt)}/${fmt(endDt)}&details=Daily+reminder+to+take+your+herbs+prescribed+by+Dr.+Pise.`; } catch(e) { return "https://calendar.google.com/"; }
     }
-
     function showPrescriptionSuccess(modalTitle, patientName, patientPhone, protocolList) {
         document.getElementById('rxSuccessTitle').innerText = modalTitle; const calLink = generateHerbReminderLink(); let protocolStr = ""; protocolList.forEach(item => protocolStr += `• ${item.name} - ${item.dose} (${item.timing})\n`);
         const msg = `Namaste ${patientName} ji! 🌿\n\nYour consultation is complete.\n(आपका परामर्श पूरा हो गया है।)\n\nHere is your Treatment Protocol:\n(आपकी उपचार विधि:)\n${protocolStr}\nNever want to miss out your remedies? Add a daily reminder to your calendar:\n(दवाइयाँ लेना ना भूलें, रिमाइंडर सेट करें):\n${calLink}\n\n— Dr. Pise, Naturopathy Clinic`;
@@ -821,7 +815,6 @@
         if(!skipRender) renderHistoryTab();
     }
     
-    // GODMODE FIX: Dashboard downloads direct URL now.
     function renderHistoryTab() {
         const area = document.getElementById('historyContentArea'); area.innerHTML = '';
         if (activeHistoryTab === 'consults') {
@@ -835,15 +828,14 @@
         } else {
             if (!currentHistoryData.reports || currentHistoryData.reports.length === 0) { area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-file-pdf text-3xl mb-2 opacity-50"></i><p>No lab reports uploaded.</p></div>`; return; }
             currentHistoryData.reports.forEach(r => {
-                area.innerHTML += `<div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ph-file-pdf text-2xl"></i></div><div><p class="font-bold text-sm text-textMain">${r.label}</p><p class="text-[11px] font-semibold text-textMuted">${r.date}</p></div></div><button onclick="downloadReportFromHistory('${r.fileUrl}', '${r.label}')" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition"><i class="ph-bold ph-download-simple"></i></button></div>`;
+                area.innerHTML += `<div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ${r.label.toLowerCase().includes('.pdf') ? 'ph-file-pdf' : 'ph-image'} text-xl"></i></div><div><p class="font-bold text-sm text-textMain line-clamp-1">${r.label}</p><p class="text-[10px] font-semibold text-textMuted">${r.date}</p></div></div><button onclick="downloadReportFromHistory('${r.fileUrlOrId}', '${r.label}')" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition"><i class="ph-bold ph-download-simple"></i></button></div>`;
             });
         }
     }
     
-    async function downloadReportFromHistory(fileUrlOrId, fileName) {
+    function downloadReportFromHistory(fileUrlOrId, fileName) {
         if (String(fileUrlOrId).startsWith('http')) {
-            window.open(fileUrlOrId, '_blank');
-            return;
+            window.open(fileUrlOrId, '_blank'); return;
         }
         showToast("Old Drive links are no longer supported. Please re-upload.", "error");
     }
@@ -879,7 +871,8 @@
                     <button onclick="openPatientHistoryFromDirectory('${f.id}', '${f.name}'); closeModal('followUpModal');" class="bg-appBg hover:bg-black/20 text-textMuted hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-appBorder shadow-sm"><i class="ph-bold ph-caret-right"></i></button>
                     <button onclick="markFollowUpDone('${f.id}', event)" class="bg-green-50 text-green-600 hover:bg-green-500 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center border border-green-200 shadow-sm ml-2" title="Mark Done"><i class="ph-bold ph-check"></i></button>
                 </div>
-            </div>`).join('');
+            </div>
+        `).join('');
     }
     
     function openFollowUpModal() { followUpsViewed = true; const redDot = document.getElementById('followUpRedDot'); if (redDot) redDot.style.display = 'none'; openModal('followUpModal'); }
