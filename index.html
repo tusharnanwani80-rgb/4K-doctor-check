@@ -145,7 +145,12 @@
 
         <div class="px-4 mt-2 relative z-0">
             <div id="queueContainer" class="space-y-0"><div class="text-center text-textMuted py-20" id="loadingState"><i class="ph ph-spinner-gap animate-spin text-4xl mb-3 inline-block"></i><p class="font-medium">Loading queue...</p></div></div>
-            <div class="text-center pt-10 pb-20"><a href="https://tusharnanwani80-rgb.github.io/seen-and-sold-check/" target="_blank" class="text-[10px] font-bold tracking-[0.15em] text-textMuted/50 uppercase hover:text-textMain transition-colors inline-block cursor-pointer">This app was made by Seen and Sold Agency.</a></div>
+            <div class="text-center pt-8 pb-20">
+                <a href="https://tusharnanwani80-rgb.github.io/seen-and-sold-check/" target="_blank" class="inline-block group cursor-pointer p-4 rounded-2xl hover:bg-pillDark transition border border-transparent hover:border-appBorder shadow-sm hover:shadow-lg">
+                    <p class="text-[10px] font-bold tracking-widest text-textMuted uppercase group-hover:text-accentWait transition-colors">This app was created by</p>
+                    <p class="text-sm font-black mt-1 text-textMain group-hover:text-accentWait transition-colors">Seen and <span class="text-accentWait">Sold</span> Agency</p>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -431,11 +436,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         const baDateEl = document.getElementById('baDate');
-        if (baDateEl) {
-            baDateEl.value = selectedDate.toISOString().split('T')[0];
-            const todayStrLocal = new Date().toISOString().split('T')[0]; 
-            baDateEl.min = todayStrLocal;
-        }
+        if (baDateEl) { baDateEl.value = selectedDate.toISOString().split('T')[0]; const todayStrLocal = new Date().toISOString().split('T')[0]; baDateEl.min = todayStrLocal; }
         await initDB(); renderDateSelector(); fetchQueueData(); fetchRemedyMaster(); fetchTemplates(); fetchAllPatients(); fetchFollowUps(); 
     });
 
@@ -560,7 +561,7 @@
 
     function scrollToCurrent() {
         if (currentQueueData.length === 0) return;
-        let targetItem = currentQueueData.find(q => q.status === 'In Consultation') || currentQueueData.find(q => q.status === 'Waiting') || currentQueueData.find(q => q.status === 'Booked');
+        let targetItem = currentQueueData.find(q => q.status === 'In Consultation') || currentQueueData.find(q => q.status === 'Waiting') || currentQueueData.find(q => q.status === 'Booked') || currentQueueData.find(q => q.status === 'Booked Online');
         if (targetItem) { const el = document.getElementById(`card-token-${targetItem.tokenNo}`); if (el) window.scrollTo({ top: el.getBoundingClientRect().top - 180, behavior: 'smooth' }); } 
         else window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -579,9 +580,12 @@
         const item = currentQueueData.find(q => String(q.tokenNo) === String(tokenNo));
         if (!item) return;
         if (currentStatus === 'Waiting' || currentStatus === 'In Consultation') { openConsultationRoom(item); if(currentStatus === 'Waiting') advanceStatusBackground(tokenNo, 'Waiting', 'In Consultation'); return; }
-        const statusFlow = ["Booked", "Waiting", "In Consultation", "Done"];
-        let currentIndex = statusFlow.indexOf(currentStatus); if (currentIndex === -1 || currentIndex === 3) return;
-        let newStatus = statusFlow[currentIndex + 1]; item.status = newStatus; renderQueue(tokenNo); advanceStatusBackground(tokenNo, currentStatus, newStatus);
+        
+        let newStatus = '';
+        if (currentStatus === 'Booked' || currentStatus === 'Booked Online') newStatus = 'Waiting';
+        else return;
+
+        item.status = newStatus; renderQueue(tokenNo); advanceStatusBackground(tokenNo, currentStatus, newStatus);
     }
 
     async function advanceStatusBackground(tokenNo, oldStatus, newStatus) {
@@ -597,7 +601,8 @@
         if(currentQueueData.length === 0) { container.innerHTML = `<div class="text-center text-textMuted py-20 font-medium bg-pillDark mx-4 rounded-3xl mt-4 border border-appBorder">No appointments today.</div>`; return; }
         currentQueueData.forEach((appt, index) => {
             let bgColor, iconClass, nextAction;
-            switch(appt.status) {
+            let actStatus = appt.status === 'Booked Online' ? 'Booked' : appt.status;
+            switch(actStatus) {
                 case 'Done': bgColor = 'bg-cardDone'; iconClass = 'ph-check-circle'; nextAction = null; break;
                 case 'In Consultation': bgColor = 'bg-cardConsult'; iconClass = 'ph-stethoscope'; nextAction = "Resume Consult"; break; 
                 case 'Waiting': bgColor = 'bg-cardWaiting'; iconClass = 'ph-hourglass-high'; nextAction = "Start Consult"; break;
@@ -609,13 +614,15 @@
             else if (nextAction) btnHtml = `<button onclick="handleQueueAction('${appt.tokenNo}', '${appt.status}')" class="text-xs font-bold bg-[#0B1120] text-white hover:bg-black px-4 py-2.5 rounded-full transition flex items-center gap-2 shadow-lg">${nextAction} <i class="ph-bold ph-check"></i></button>`;
             else btnHtml = `<div class="flex items-center gap-2 text-sm font-bold opacity-70"><div class="w-8 h-1.5 bg-[#0B1120] rounded-full"></div> 100%</div>`;
 
+            let onlineBadge = appt.status === 'Booked Online' ? `<span class="bg-brandWait text-white px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase shadow-sm">🌐 Online</span>` : '';
+
             container.innerHTML += `
                 <div id="card-token-${appt.tokenNo}" class="flex h-full group ${animClass}">
                     <div class="w-16 flex flex-col items-center shrink-0 pt-1"><span class="text-[10px] font-bold text-textMuted uppercase tracking-widest mb-1 mt-2">Token</span><span class="text-[22px] font-black text-textMain leading-none mb-2">#${appt.tokenNo}</span>${!isLast ? `<div class="w-[2px] flex-1 border-l-2 border-dashed border-textMuted/30 mb-2"></div>` : `<div class="flex-1"></div>`}</div>
                     <div class="flex-1 pl-3 pb-8">
-                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm"><i class="ph-fill ${iconClass} text-lg"></i> ${appt.status}</div>
+                        <div class="inline-flex items-center gap-2 px-4 py-2.5 ${bgColor} folder-tab rounded-t-[20px] text-xs font-black text-[#0B1120] uppercase tracking-wide shadow-sm"><i class="ph-fill ${iconClass} text-lg"></i> ${actStatus}</div>
                         <div class="${bgColor} rounded-[32px] rounded-tl-none p-5 text-[#0B1120] shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
-                            <div class="flex justify-between items-start"><div><h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3><p class="text-[13px] font-bold opacity-60">ID: ${appt.patientId} • ${formatTimeDisplay(appt.timeSlot)}</p></div></div>
+                            <div class="flex justify-between items-start"><div><h3 class="text-xl font-extrabold tracking-tight mb-0.5">${appt.patientName}</h3><p class="text-[13px] font-bold opacity-60 flex items-center gap-2">ID: ${appt.patientId} • ${formatTimeDisplay(appt.timeSlot)} ${onlineBadge}</p></div></div>
                             <div class="mt-5 pt-4 border-t border-black/10 flex justify-between items-center"><button onclick="openPatientHistoryFromDirectory('${appt.patientId}', '${appt.patientName}')" class="w-8 h-8 rounded-full bg-[#0B1120] border-2 border-${bgColor} flex items-center justify-center hover:scale-110 transition-transform shadow-md"><i class="ph-fill ph-file-text text-[12px] text-white"></i></button>${btnHtml}</div>
                         </div>
                     </div>
@@ -669,7 +676,7 @@
         const btn = document.getElementById('btnSubmitBooking'); const originalText = btn.innerHTML; btn.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i> Booking...`; btn.disabled = true;
 
         try {
-            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({action: 'bookAppointment', patientId: pId, date: date, timeSlot: time}) });
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({action: 'bookAppointment', patientId: pId, date: date, timeSlot: time, source: 'clinic'}) });
             const text = await res.text(); let data;
             try { data = JSON.parse(text); } catch(err) { throw new Error("Server returned invalid response."); }
             if(data.success) { showBookingSuccess(pName, date, time, data.data.tokenNo, currentBookingPhone); clearSelectedPatient(); fetchQueueData(); } else { showToast(data.message, "error"); } 
@@ -828,15 +835,36 @@
         } else {
             if (!currentHistoryData.reports || currentHistoryData.reports.length === 0) { area.innerHTML = `<div class="p-8 text-center text-textMuted bg-pillDark rounded-[24px] border border-dashed border-appBorder"><i class="ph-bold ph-file-pdf text-3xl mb-2 opacity-50"></i><p>No lab reports uploaded.</p></div>`; return; }
             currentHistoryData.reports.forEach(r => {
-                area.innerHTML += `<div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ${r.label.toLowerCase().includes('.pdf') ? 'ph-file-pdf' : 'ph-image'} text-xl"></i></div><div><p class="font-bold text-sm text-textMain line-clamp-1">${r.label}</p><p class="text-[10px] font-semibold text-textMuted">${r.date}</p></div></div><button onclick="downloadReportFromHistory('${r.fileUrlOrId}', '${r.label}')" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition"><i class="ph-bold ph-download-simple"></i></button></div>`;
+                area.innerHTML += `
+                    <div class="bg-pillDark border border-appBorder p-4 rounded-2xl flex items-center justify-between mb-3 shadow-sm group hover:border-accentWait/50 transition cursor-pointer">
+                        <div class="flex items-center gap-3 flex-1 min-w-0 mr-2">
+                            <div class="w-10 h-10 rounded-xl bg-accentWait/10 text-accentWait flex items-center justify-center shrink-0"><i class="ph-fill ${r.label.toLowerCase().includes('.pdf') ? 'ph-file-pdf' : 'ph-image'} text-xl"></i></div>
+                            <div class="min-w-0 flex-1">
+                                <p class="font-bold text-sm text-textMain truncate">${r.label}</p>
+                                <p class="text-[10px] font-semibold text-textMuted">${r.date}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="deleteReportRequest('${r.reportId}')" class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-colors border border-red-100 shadow-sm"><i class="ph-bold ph-trash"></i></button>
+                            <button onclick="downloadReportFromHistory('${r.fileUrlOrId}', '${r.label}')" class="w-8 h-8 rounded-full bg-appBg flex items-center justify-center text-textMain group-hover:bg-accentWait group-hover:text-[#0B1120] transition shadow-sm"><i class="ph-bold ph-download-simple"></i></button>
+                        </div>
+                    </div>`;
             });
         }
     }
     
+    async function deleteReportRequest(reportId) {
+        if(!confirm("Are you sure you want to delete this report?")) return;
+        showToast("Deleting...");
+        try {
+            const res = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteReport', reportId: reportId }) }); const data = await res.json();
+            if(data.success) { showToast("Deleted successfully"); currentHistoryData.reports = currentHistoryData.reports.filter(r => r.reportId !== reportId); renderHistoryTab(); } 
+            else showToast(data.message, "error");
+        } catch(err) { showToast("Connection failed.", "error"); }
+    }
+
     function downloadReportFromHistory(fileUrlOrId, fileName) {
-        if (String(fileUrlOrId).startsWith('http')) {
-            window.open(fileUrlOrId, '_blank'); return;
-        }
+        if (String(fileUrlOrId).startsWith('http')) { window.open(fileUrlOrId, '_blank'); return; }
         showToast("Old Drive links are no longer supported. Please re-upload.", "error");
     }
 
